@@ -270,6 +270,13 @@ inline Codigo Hotel::getCodigo() const {
     return codigo;
 }
 
+/**
+ * @class Quarto
+ * @brief Entidade que representa um Quarto específico dentro de um Hotel.
+ *
+ * @details Contém as características e a diária do quarto.
+ * O Número é a chave primária (PK) no contexto do Hotel.
+ */
 class Quarto {
     private:
         Numero numero;
@@ -277,13 +284,53 @@ class Quarto {
         Dinheiro diaria;
         Ramal ramal;
     public:
+        /**
+         * @brief Atribui o Número do Quarto.
+         * @param novoNumero Objeto Domínio Numero, validado entre 001 e 999.
+         */
         void setNumero(const Numero& novoNumero);
+
+        /**
+         * @brief Atribui a Capacidade máxima de pessoas do Quarto.
+         * @param novaCapacidade Objeto Domínio Capacidade,
+         * validado para 1, 2, 3 ou 4.
+         */
         void setCapacidade(const Capacidade& novaCapacidade);
+
+        /**
+         * @brief Atribui o valor da Diária do Quarto.
+         * @param novaDiaria Objeto Domínio Dinheiro.
+         */
         void setDiaria(const Dinheiro& novaDiaria);
+
+        /**
+         * @brief Atribui o Ramal interno do Quarto.
+         * @param novoRamal Objeto Domínio Ramal.
+         */
         void setRamal(const Ramal& novoRamal);
+
+        /**
+         * @brief Retorna o Número do Quarto.
+         * @return O objeto Domínio Numero.
+         */
         Numero getNumero() const;
+
+        /**
+         * @brief Retorna a Capacidade do Quarto.
+         * @return O objeto Domínio Capacidade.
+         */
         Capacidade getCapacidade() const;
+
+        /**
+         * @brief Retorna o valor da Diária do Quarto.
+         * @return O objeto Domínio Dinheiro.
+         */
         Dinheiro getDiaria() const;
+
+        /**
+         * @brief Retorna o Ramal do Quarto.
+         * @return O objeto Domínio Ramal.
+         */
         Ramal getRamal() const;
 };
 
@@ -319,6 +366,13 @@ inline Ramal Quarto::getRamal() const {
     return ramal;
 }
 
+/**
+ * @class Reserva
+ * @brief Entidade que representa uma Reserva de Quarto.
+ *
+ * @details Contém os detalhes de datas e valores da reserva.
+ * Código é a chave primária (PK).
+ */
 class Reserva {
     private:
         Data chegada;
@@ -326,13 +380,53 @@ class Reserva {
         Dinheiro valor;
         Codigo codigo;
     public:
+        /**
+         * @brief Atribui a Data de Chegada da Reserva.
+         * @param novaChegada Objeto Domínio Data, validada com dia-mês-ano correto,
+         * incluindo anos bissextos.
+         */
         void setChegada(const Data& novaChegada);
+
+        /**
+         * @brief Atribui a Data de Partida da Reserva.
+         * @param novaPartida Objeto Domínio Data.
+         */
         void setPartida(const Data& novaPartida);
+
+        /**
+         * @brief Atribui o Valor total da Reserva.
+         * @param novoValor Objeto Domínio Dinheiro.
+         */
         void setValor(const Dinheiro& novoValor);
+
+        /**
+         * @brief Atribui o Código da Reserva.
+         * @param novoCodigo Objeto Domínio Codigo.
+         */
         void setCodigo(const Codigo& novoCodigo);
+
+        /**
+         * @brief Retorna a Data de Chegada da Reserva.
+         * @return O objeto Domínio Data.
+         */
         Data getChegada() const;
+
+        /**
+         * @brief Retorna a Data de Partida da Reserva.
+         * @return O objeto Domínio Data.
+         */
         Data getPartida() const;
+
+        /**
+         * @brief Retorna o Valor total da Reserva.
+         * @return O objeto Domínio Dinheiro.
+         */
         Dinheiro getValor() const;
+
+        /**
+         * @brief Retorna o Código da Reserva.
+         * @return O objeto Domínio Codigo.
+         */
         Codigo getCodigo() const;
 };
 
