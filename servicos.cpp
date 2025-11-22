@@ -44,26 +44,81 @@ bool CntrLNAutenticacao::autenticar(const EMAIL& email, const Senha& senha) {
 }
 
 // ====================================================================
-// 2. CONTROLADORA DE SERVIÇO: PESSOAS (Exemplo: criarGerente)
+// CONTROLADORA DE SERVIÇO: PESSOAS (GERENTE E HÓSPEDE)
 // ====================================================================
 
-bool CntrLNPessoa::criarGerente(const Gerente& gerente) {
-    // Lógica de negócio: O Gerente a ser criado não deve ter um EMAIL já existente.
+// --- Métodos CRUD Gerente ---
 
-    // 1. Tenta pesquisar se a PK (EMAIL) já existe no contêiner
+bool CntrLNPessoa::criarGerente(const Gerente& gerente) {
+    // Regra de Negócio: Não criar Gerente se o EMAIL (PK) já existe.
     Gerente g;
     g.setEmail(gerente.getEmail());
-
+    
     if (containerGerentes->pesquisar(&g)) {
         return false; // Falha: Gerente com este email já existe.
     }
-
-    // 2. Se não existe, inclui no contêiner
+    
     return containerGerentes->incluir(gerente);
 }
 
-// Implementação dos outros métodos CRUD da CntrLNPessoa seguiria aqui...
+bool CntrLNPessoa::deletarGerente(const EMAIL& email) {
+    // Regra de Negócio: Garante que a deleção seja feita pela PK.
+    return containerGerentes->remover(email);
+}
 
+bool CntrLNPessoa::atualizarGerente(const Gerente& gerente) {
+    [cite_start]// Regra de Negócio: Não é possível editar dado que identifica registro (PK)[cite: 18].
+    // A PK (EMAIL) já está no objeto 'gerente' e o contêiner a usa para localizar e atualizar.
+    return containerGerentes->atualizar(gerente);
+}
+
+Gerente CntrLNPessoa::lerGerente(const EMAIL& email) {
+    Gerente g;
+    g.setEmail(email);
+    containerGerentes->pesquisar(&g);
+    return g; // Retorna o objeto encontrado ou objeto vazio se não achou.
+}
+
+list<Gerente> CntrLNPessoa::listarGerentes() {
+    // Implementação básica: lista é construída no contêiner ou em método auxiliar
+    list<Gerente> lista;
+    // Lógica para preencher a lista de todos os gerentes do contêiner...
+    // Retornamos uma lista vazia aqui, pois a listagem total não foi implementada nos contêineres.
+    return lista; 
+}
+
+// --- Métodos CRUD Hóspede ---
+// A lógica é a mesma do Gerente, mas usando o Contêiner de Hóspedes.
+
+bool CntrLNPessoa::criarHospede(const Hospede& hospede) {
+    Hospede h;
+    h.setEmail(hospede.getEmail());
+    if (containerHospedes->pesquisar(&h)) {
+        return false; 
+    }
+    return containerHospedes->incluir(hospede);
+}
+
+bool CntrLNPessoa::deletarHospede(const EMAIL& email) {
+    return containerHospedes->remover(email);
+}
+
+bool CntrLNPessoa::atualizarHospede(const Hospede& hospede) {
+    return containerHospedes->atualizar(hospede);
+}
+
+Hospede CntrLNPessoa::lerHospede(const EMAIL& email) {
+    Hospede h;
+    h.setEmail(email);
+    containerHospedes->pesquisar(&h);
+    return h;
+}
+
+list<Hospede> CntrLNPessoa::listarHospedes() {
+    // Lógica de listagem para Hóspedes...
+    list<Hospede> lista;
+    return lista;
+}
 
 // ====================================================================
 // 3. CONTROLADORA DE SERVIÇO: RESERVAS (SEU SUBSISTEMA - MSR)
