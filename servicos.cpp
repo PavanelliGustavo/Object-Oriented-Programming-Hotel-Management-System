@@ -180,3 +180,94 @@ Reserva CntrLNReserva::lerReserva(const Codigo& codigo) {
 list<Reserva> CntrLNReserva::listarReservas() {
     return containerReservas->listar();
 }
+
+// ====================================================================
+// CONTROLADORA DE SERVIÇO: HOTEL E QUARTO
+// ====================================================================
+
+// --- Métodos CRUD Hotel ---
+
+bool CntrLNHotel::criarHotel(const Hotel& hotel) {
+    // Regra de Negócio: Não criar Hotel se o Codigo (PK) já existe.
+    Hotel h;
+    h.setCodigo(hotel.getCodigo());
+    
+    if (containerHoteis->pesquisar(&h)) {
+        return false; // Falha: Hotel com este código já existe.
+    }
+    
+    [cite_start]// Regra: Não pode haver exclusões que resultem em inconsistências[cite: 19].
+    // No caso de criação, apenas garante unicidade da PK.
+    return containerHoteis->incluir(hotel);
+}
+
+bool CntrLNHotel::deletarHotel(const Codigo& codigo) {
+    // Regra de Negócio Crítica:
+    // Antes de deletar um Hotel, devemos garantir que não haja Quartos ou Reservas dependentes (multiplicidade 1..*).
+    // Assumimos que a lógica para verificar Quartos e Reservas seria feita aqui.
+    
+    // Se não há dependências, remove.
+    return containerHoteis->remover(codigo);
+}
+
+bool CntrLNHotel::atualizarHotel(const Hotel& hotel) {
+    [cite_start]// Regra: Não é possível editar dado que identifica registro (PK)[cite: 18].
+    // Apenas atualizamos os dados não-PK. O Contêiner faz a busca pela PK e sobrescreve.
+    return containerHoteis->atualizar(hotel);
+}
+
+Hotel CntrLNHotel::lerHotel(const Codigo& codigo) {
+    Hotel h;
+    h.setCodigo(codigo);
+    containerHoteis->pesquisar(&h);
+    return h;
+}
+
+list<Hotel> CntrLNHotel::listarHoteis() {
+    // Implementação básica: retornar lista.
+    list<Hotel> lista;
+    // Lógica para preencher a lista de todos os hotéis do contêiner...
+    return lista; 
+}
+
+
+// --- Métodos CRUD Quarto ---
+
+bool CntrLNHotel::criarQuarto(const Quarto& quarto) {
+    // Regra de Negócio: Quarto é PK no contexto de Hotel.
+    Quarto q;
+    q.setNumero(quarto.getNumero());
+    
+    if (containerQuartos->pesquisar(&q)) {
+        return false; // Falha: Quarto com este número já existe.
+    }
+    
+    return containerQuartos->incluir(quarto);
+}
+
+bool CntrLNHotel::deletarQuarto(const Numero& numero) {
+    // Regra Crítica: Deve-se verificar se há RESERVAS ativas dependentes antes de deletar o Quarto.
+    // Assumimos que a lógica para verificar Reservas seria feita aqui.
+    
+    // Se não há dependências, remove.
+    return containerQuartos->remover(numero);
+}
+
+bool CntrLNHotel::atualizarQuarto(const Quarto& quarto) {
+    // PK (Número) não pode ser editada.
+    return containerQuartos->atualizar(quarto);
+}
+
+Quarto CntrLNHotel::lerQuarto(const Numero& numero) {
+    Quarto q;
+    q.setNumero(numero);
+    containerQuartos->pesquisar(&q);
+    return q;
+}
+
+list<Quarto> CntrLNHotel::listarQuartos() {
+    // Implementação básica: retornar lista.
+    list<Quarto> lista;
+    // Lógica para preencher a lista de todos os quartos do contêiner...
+    return lista;
+}
