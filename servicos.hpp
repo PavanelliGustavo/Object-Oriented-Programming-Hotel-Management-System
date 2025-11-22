@@ -83,4 +83,62 @@ public:
     void setContainer(ContainerReserva* container) { this->containerReservas = container; }
 };
 
+// ====================================================================
+// 4. ADIÇÃO CRÍTICA: INTERFACE E CONTROLADORA DE SERVIÇO DE HOTEL/QUARTO
+// ====================================================================
+
+/**
+ * @class ILNHotel
+ * @brief Interface para o Módulo de Serviço de Hotel e Quarto.
+ *
+ * @details Define os serviços CRUD e de listagem para as Entidades Hotel e Quarto.
+ */
+class ILNHotel {
+public:
+    // --- Hotel CRUD ---
+    virtual bool criarHotel(const Hotel& hotel) = 0;
+    virtual bool deletarHotel(const Codigo& codigo) = 0;
+    virtual bool atualizarHotel(const Hotel& hotel) = 0;
+    virtual Hotel lerHotel(const Codigo& codigo) = 0;
+    virtual list<Hotel> listarHoteis() = 0;
+
+    // --- Quarto CRUD ---
+    virtual bool criarQuarto(const Quarto& quarto) = 0;
+    virtual bool deletarQuarto(const Numero& numero) = 0;
+    virtual bool atualizarQuarto(const Quarto& quarto) = 0;
+    virtual Quarto lerQuarto(const Numero& numero) = 0;
+    virtual list<Quarto> listarQuartos() = 0;
+
+    virtual ~ILNHotel() {}
+};
+
+
+/**
+ * @class CntrLNHotel
+ * @brief Controladora que implementa a lógica de negócio para Hotel e Quarto.
+ */
+class CntrLNHotel : public ILNHotel {
+private:
+    ContainerHotel* containerHoteis;
+    ContainerQuarto* containerQuartos;
+
+public:
+    // Implementação dos métodos de ILNHotel
+    bool criarHotel(const Hotel& hotel) override;
+    bool deletarHotel(const Codigo& codigo) override;
+    bool atualizarHotel(const Hotel& hotel) override;
+    Hotel lerHotel(const Codigo& codigo) override;
+    list<Hotel> listarHoteis() override;
+
+    bool criarQuarto(const Quarto& quarto) override;
+    bool deletarQuarto(const Numero& numero) override;
+    bool atualizarQuarto(const Quarto& quarto) override;
+    Quarto lerQuarto(const Numero& numero) override;
+    list<Quarto> listarQuartos() override;
+
+    // Métodos de Injeção de Dependência
+    void setContainerHotel(ContainerHotel* container) { this->containerHoteis = container; }
+    void setContainerQuarto(ContainerQuarto* container) { this->containerQuartos = container; }
+};
+
 #endif // SERVICOS_HPP_INCLUDED
