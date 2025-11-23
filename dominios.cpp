@@ -134,7 +134,7 @@ void Dinheiro::validar(const string& valor) { // CORREÇÃO: const string&
         throw invalid_argument("Formato invalido. Deve conter virgula separando centavos.\n");
     }
     // ... [Restante da lógica Dinheiro::validar está OK] ...
-    
+
     // Recalcular o valor numérico apenas com dígitos para checar o limite
     string strValorNumerico;
     for (char c : valor) {
@@ -157,7 +157,7 @@ void Dinheiro::validar(const string& valor) { // CORREÇÃO: const string&
 
 void Dinheiro::setValor(const string& novoValor) { // CORREÇÃO: setValor e const string&
     validar(novoValor);
-    
+
     // CRÍTICO: Recalcular o valor apenas com dígitos para armazenar em 'int' (centavos)
     string strCentavos;
     for (char c : novoValor) {
@@ -165,7 +165,7 @@ void Dinheiro::setValor(const string& novoValor) { // CORREÇÃO: setValor e con
             strCentavos += c;
         }
     }
-    this->valor = stoi(strCentavos); 
+    this->valor = stoi(strCentavos);
 }
 
 string Dinheiro::getValor() const {
@@ -253,14 +253,14 @@ void Telefone::setValor(const string &telefone) { // CORREÇÃO: setValor
 // ====================================================================
 
 void Codigo::validar(const std::string& codigo) { // CORREÇÃO: const std::string&
-    
+
     if(codigo.length() != 10) {
         throw std::invalid_argument("Tamanho inválido (deve ser 10).");
     }
 
     for(char x : codigo) {
         // CORREÇÃO: Usar isalnum (ou checar a-z, A-Z, 0-9)
-        if(!isalnum(x)) { 
+        if(!isalnum(x)) {
             throw std::invalid_argument("O código deve ter apenas letras (a-z, A-Z) e números (0-9).");
         }
     }
@@ -274,14 +274,14 @@ void Codigo::setValor(const std::string& codigo) { // CORREÇÃO: setValor e con
 // Construtor Codigo::Codigo(std::string& codigo) foi removido.
 
 void EMAIL::validar(const std::string& email) { // CORREÇÃO: const std::string&
-    
+
     //... [Lógica do EMAIL - Grande, será corrigida para usar const] ...
-    
+
     // CRÍTICO: O código original manipula a string 'email' e a usa para atribuir 'this->email'.
     // Mas agora 'email' é const! Você precisa criar uma cópia interna para manipulação.
-    
+
     string emailCopia = email; // Criamos uma cópia para manipulação
-    
+
     //dividir pra verificar parte local e dominio
     size_t arroba = emailCopia.find("@"); // Usa a cópia
 
@@ -290,7 +290,7 @@ void EMAIL::validar(const std::string& email) { // CORREÇÃO: const std::string
     }
 
     // ... [Resto da lógica EMAIL::validar está OK, mas deve usar 'emailCopia' e 'std::tolower'] ...
-    
+
     // O final da validação deve salvar o valor padronizado na variável interna da classe,
     // mas o método 'validar' não faz isso.
 }
@@ -298,17 +298,17 @@ void EMAIL::validar(const std::string& email) { // CORREÇÃO: const std::string
 void EMAIL::setValor(const std::string& email) { // CORREÇÃO: setValor e const string&
     // A validação do EMAIL é complexa e precisa de manipulação da string.
     // O setValor precisa chamar a validação E o ajuste da string.
-    
+
     string emailAjustado = email;
     validar(emailAjustado); // Aqui validar deve aceitar uma string não-const para ajustes
                             // OU a lógica de ajuste deve ir para cá.
-                            
+
     // Opção mais simples: Validar com const e a lógica de ajuste deve ir para o setValor.
     // Reverter para o modelo anterior onde o validar é const e o setValor faz a manipulação.
-    
+
     string emailCopia = email;
     // ... [Repetir a lógica de manipulação e ajuste de minúsculas no emailCopia aqui] ...
-    
+
     validar(emailCopia); // A validação já checa o formato.
     this->email = emailCopia; // Se validou, atribui.
 }
