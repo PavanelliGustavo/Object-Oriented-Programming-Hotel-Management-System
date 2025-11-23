@@ -1,87 +1,148 @@
 #ifndef INTERFACES_HPP_INCLUDED
 #define INTERFACES_HPP_INCLUDED
 
-#include "entidades.hpp" // Para usar as Entidades (Gerente, Hospede, Reserva, etc.)
-#include "dominios.hpp"   // Para usar Domínios (EMAIL, Senha, Codigo, etc.)
-#include <list>           // Para o método listar
+#include "entidades.hpp"
+#include "dominios.hpp"
+#include <list>
+
+using namespace std;
 
 // ====================================================================
-// 1. INTERFACE: SUBSISTEMA DE AUTENTICAÇÃO (SA)
+// CAMADA DE SERVIÇO (Service Interfaces)
+// Definições usadas pelos Módulos de Apresentação (MAA, MAP, MAR)
 // ====================================================================
 
 /**
- * @class ILNAutenticacao
- * @brief Interface para o Módulo de Serviço de Autenticação.
- *
- * @details Define os serviços necessários para verificar a identidade de um Gerente
- * no sistema.
+ * @class ISAutenticacao (ISA no diagrama)
+ * @brief Interface para o Serviço de Autenticação.
  */
-class ILNAutenticacao {
+class ISAutenticacao {
 public:
-    /**
-     * @brief Tenta autenticar um usuário (Gerente) com suas credenciais.
-     * * @param email Objeto Domínio EMAIL do Gerente.
-     * @param senha Objeto Domínio Senha do Gerente.
-     * @return true se as credenciais forem válidas e o Gerente existir no sistema; false caso contrário.
-     */
     virtual bool autenticar(const EMAIL& email, const Senha& senha) = 0;
-    virtual ~ILNAutenticacao() {}
+    virtual ~ISAutenticacao() {}
 };
 
-
-// ====================================================================
-// 2. INTERFACE: SUBSISTEMA DE PESSOAS (SP)
-// ====================================================================
-
 /**
- * @class ILNPessoa
- * @brief Interface para o Módulo de Serviço de Pessoas (Gerente e Hóspede).
- *
- * @details Define os serviços CRUD e de listagem para as Entidades Gerente e Hóspede.
+ * @class ISPessoa (ISP no diagrama)
+ * @brief Interface para o Serviço de Pessoas.
  */
-class ILNPessoa {
+class ISPessoa {
 public:
-    // --- Gerente CRUD ---
     virtual bool criarGerente(const Gerente& gerente) = 0;
     virtual bool deletarGerente(const EMAIL& email) = 0;
     virtual bool atualizarGerente(const Gerente& gerente) = 0;
     virtual Gerente lerGerente(const EMAIL& email) = 0;
     virtual list<Gerente> listarGerentes() = 0;
 
-    // --- Hóspede CRUD ---
     virtual bool criarHospede(const Hospede& hospede) = 0;
     virtual bool deletarHospede(const EMAIL& email) = 0;
     virtual bool atualizarHospede(const Hospede& hospede) = 0;
     virtual Hospede lerHospede(const EMAIL& email) = 0;
     virtual list<Hospede> listarHospedes() = 0;
 
-    virtual ~ILNPessoa() {}
+    virtual ~ISPessoa() {}
 };
 
-
-// ====================================================================
-// 3. INTERFACE: SUBSISTEMA DE RESERVAS (SR)
-// ====================================================================
-
 /**
- * @class ILNReserva
- * @brief Interface para o Módulo de Serviço de Reservas (MSR).
- *
- * @details Define os serviços CRUD e de listagem para a Entidade Reserva,
- * incluindo a lógica de negócio de conflito de datas.
+ * @class ISReserva (ISR no diagrama)
+ * @brief Interface para o Serviço de Reservas e Infraestrutura.
  */
-class ILNReserva {
+class ISReserva {
 public:
-    // Métodos CRUD (Chave Primária é Codigo)
+    // Infraestrutura (Hotel/Quarto)
+    virtual bool criarHotel(const Hotel& hotel) = 0;
+    virtual bool deletarHotel(const Codigo& codigo) = 0;
+    virtual bool atualizarHotel(const Hotel& hotel) = 0;
+    virtual Hotel lerHotel(const Codigo& codigo) = 0;
+    virtual list<Hotel> listarHoteis() = 0;
+
+    virtual bool criarQuarto(const Quarto& quarto) = 0;
+    virtual bool deletarQuarto(const Numero& numero) = 0;
+    virtual bool atualizarQuarto(const Quarto& quarto) = 0;
+    virtual Quarto lerQuarto(const Numero& numero) = 0;
+    virtual list<Quarto> listarQuartos() = 0;
+
+    // Reservas
     virtual bool criarReserva(const Reserva& reserva) = 0;
     virtual bool deletarReserva(const Codigo& codigo) = 0;
     virtual bool atualizarReserva(const Reserva& reserva) = 0;
     virtual Reserva lerReserva(const Codigo& codigo) = 0;
-
-    // Método para listar todas as reservas
     virtual list<Reserva> listarReservas() = 0;
 
-    virtual ~ILNReserva() {}
+    virtual ~ISReserva() {}
+};
+
+// ====================================================================
+// CAMADA DE APRESENTAÇÃO (Presentation Interfaces)
+// Definições usadas pelo Módulo de Acesso e Interface (MAI)
+// ====================================================================
+
+/**
+ * @class IAAutenticacao (IAA no diagrama)
+ * @brief Interface para o Módulo de Apresentação de Autenticação.
+ * @details Responsável por exibir telas de login/cadastro.
+ */
+class IAAutenticacao {
+public:
+    /**
+     * @brief Executa o fluxo de autenticação.
+     * @param email Referência para armazenar o email autenticado em caso de sucesso.
+     * @return true se o login foi bem sucedido, false caso contrário.
+     */
+    virtual bool executar(EMAIL& email) = 0;
+
+    /**
+     * @brief Define o serviço de autenticação a ser utilizado.
+     * @details Permite injetar a dependência do serviço (ISA).
+     */
+    virtual void setISAutenticacao(ISAutenticacao* servico) = 0;
+
+    virtual ~IAAutenticacao() {}
+};
+
+/**
+ * @class IAPessoal (IAP no diagrama)
+ * @brief Interface para o Módulo de Apresentação Pessoal.
+ * @details Responsável pelo perfil do gerente.
+ */
+class IAPessoal {
+public:
+    /**
+     * @brief Executa o menu de perfil pessoal.
+     * @param email O email do gerente logado.
+     */
+    virtual void executar(const EMAIL& email) = 0;
+
+    /**
+     * @brief Define o serviço de pessoas a ser utilizado.
+     * @details Permite injetar a dependência do serviço (ISP).
+     */
+    virtual void setISPessoa(ISPessoa* servico) = 0;
+
+    virtual ~IAPessoal() {}
+};
+
+/**
+ * @class IAReserva (IAR no diagrama)
+ * @brief Interface para o Módulo de Apresentação de Reservas.
+ * @details Responsável pela gestão do hotel (Reservas, Quartos, Hóspedes).
+ */
+class IAReserva {
+public:
+    /**
+     * @brief Executa o menu de gestão de reservas e infraestrutura.
+     * @param email O email do gerente logado (para logs ou permissões).
+     */
+    virtual void executar(const EMAIL& email) = 0;
+
+    /**
+     * @brief Define os serviços a serem utilizados.
+     * @details Injeta dependências de Reservas e Pessoas (necessário para gerir hóspedes).
+     */
+    virtual void setISReserva(ISReserva* servico) = 0;
+    virtual void setISPessoa(ISPessoa* servico) = 0; // MAR também lida com hóspedes
+
+    virtual ~IAReserva() {}
 };
 
 #endif // INTERFACES_HPP_INCLUDED
