@@ -1,6 +1,6 @@
 #include "containers.hpp"
 #include <iostream>
-#include <algorithm> 
+#include <algorithm>
 
 using namespace std;
 
@@ -133,7 +133,7 @@ bool ContainerHospede::pesquisar(Hospede* hospede) const {
     const EMAIL& emailPesquisa = hospede->getEmail();
     for (const Hospede& h : container) {
         if (h.getEmail().getValor() == emailPesquisa.getValor()) {
-            *hospede = h; 
+            *hospede = h;
             return true;
         }
     }
@@ -159,7 +159,7 @@ bool ContainerHospede::atualizar(const Hospede& hospede) {
 bool ContainerHotel::incluir(const Hotel& hotel) {
     for (const Hotel& h : container) {
         if (h.getCodigo().getValor() == hotel.getCodigo().getValor()) {
-            return false; 
+            return false;
         }
     }
     container.push_back(hotel);
@@ -206,7 +206,7 @@ bool ContainerHotel::atualizar(const Hotel& hotel) {
 bool ContainerQuarto::incluir(const Quarto& quarto) {
     for (const Quarto& q : container) {
         if (q.getNumero().getValor() == quarto.getNumero().getValor()) {
-            return false; 
+            return false;
         }
     }
     container.push_back(quarto);
