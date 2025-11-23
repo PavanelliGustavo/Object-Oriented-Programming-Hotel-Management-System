@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
-#include <limits> // Para manipulação de cin
+#include <limits> 
 
 using namespace std;
 
@@ -76,20 +76,7 @@ bool CntrIUReserva::coletarDadosReserva(Reserva* reserva) {
 // CONTROLADORA DE APRESENTAÇÃO: INTEGRAÇÃO (MAI)
 // ====================================================================
 
-// Adicionar método set de interfaces para as outras controladoras (Pessoas, Hotel, etc.) aqui.
-// Por exemplo:
-/*
-void CntrIUIntegracao::setCtrlPessoa(IUIPessoa* ctrl) {
-    this->ctrlPessoa = ctrl;
-}
-*/
-
 void CntrIUIntegracao::executar() {
-    // Este método é chamado após o login bem-sucedido.
-    
-    // Simulação: o sistema deve começar chamando o menu de Autenticação.
-    // O Menu Integracao real deve ser chamado APÓS a autenticação.
-
     int opcao = 0;
     while (autenticado && opcao != 5) {
         cout << "\n=========================================\n";
@@ -101,36 +88,36 @@ void CntrIUIntegracao::executar() {
         cout << "4 - Listagens Gerais (Hoteis, Quartos, etc.)\n";
         cout << "5 - Deslogar e Sair\n";
         cout << "Selecione uma opcao: ";
-        
+
         if (!(cin >> opcao)) {
             cout << "Opcao invalida. Tente novamente." << endl;
             cin.clear();
             limparBuffer();
             continue;
         }
-        
+
         switch (opcao) {
-            case 1: 
-                // Exemplo: ctrlPessoa->executarMenuPessoas(); 
-                cout << "Acessando Gerenciamento de Pessoas..." << endl;
+            case 1:
+                // if (ctrlPessoa) ctrlPessoa->executar();
+                cout << "Acessando Gerenciamento de Pessoas (Ainda nao implementado)..." << endl;
                 break;
-            case 2: 
-                // Exemplo: ctrlHotel->executarMenuHotel();
-                cout << "Acessando Gerenciamento de Hoteis e Quartos..." << endl;
+            case 2:
+                // if (ctrlHotel) ctrlHotel->executar();
+                cout << "Acessando Gerenciamento de Hoteis e Quartos (Ainda nao implementado)..." << endl;
                 break;
-            case 3: 
-                // Chamada ao seu subsistema de Reservas (MAR)
-                // Exemplo: ctrlReserva->executar(); 
-                cout << "Acessando Gerenciamento de Reservas..." << endl;
+            case 3:
+                // CORREÇÃO: Usar a referência injetada para executar o menu de Reservas.
+                if (ctrlReserva) ctrlReserva->executar();
+                else cout << "Erro: Modulo de Reservas nao foi ligado.\n";
                 break;
-            case 4: 
-                cout << "Acessando Listagens (Requisito Funcional)..." << endl;
+            case 4:
+                cout << "Acessando Listagens (Ainda nao implementado)..." << endl;
                 break;
             case 5:
                 autenticado = false; // Desloga e sai do loop.
                 cout << "Deslogado. Encerrando o sistema." << endl;
                 break;
-            default: 
+            default:
                 cout << "Opcao invalida.\n";
         }
     }
@@ -151,7 +138,7 @@ bool CntrIUAutenticacao::executar() {
         cin >> emailStr;
         cout << "Digite sua SENHA: ";
         cin >> senhaStr;
-        
+
         try {
             // 1. Validação de formato (Domínio)
             EMAIL domEmail;
@@ -159,11 +146,11 @@ bool CntrIUAutenticacao::executar() {
 
             Senha domSenha;
             domSenha.setValor(senhaStr);
-            
+
             // 2. Delega a verificação para a Camada de Serviço
             if (servicoAutenticacao->autenticar(domEmail, domSenha)) {
                 cout << "\nSUCESSO: Gerente autenticado!" << endl;
-                
+
                 // 3. Informa o Menu Principal (MAI) que o login foi feito
                 controladorIntegracao->setAutenticado(true);
                 autenticacaoSucesso = true;
@@ -176,12 +163,12 @@ bool CntrIUAutenticacao::executar() {
             // Captura a exceção lançada pelo Domínio (e.g., Email ou Senha mal formatados)
             cout << "\nERRO DE FORMATO: " << e.what() << endl;
         }
-        
+
         cout << "Pressione Enter para continuar...";
         cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpa buffer
         cin.get();
     }
-    
+
     return autenticacaoSucesso;
 }
 
