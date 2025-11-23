@@ -8,10 +8,14 @@
 
 using namespace std;
 
+// ====================================================================
+// HIERARQUIA DE PESSOAS
+// ====================================================================
+
 /**
  * @class Pessoa
  * @brief Entidade base que representa uma Pessoa no sistema.
- * 
+ *
  * @details Esta classe define os atributos comuns a Gerentes e Hóspedes.
  * A chave primária(PK) do resgistro é o EMAIL.
  */
@@ -67,7 +71,7 @@ inline EMAIL Pessoa::getEmail() const {
 /**
  * @class Gerente
  * @brief Entidade que representa o Gerente do sistema.
- * 
+ *
  * @details Herda de Pessoa e adiciona atributos de acesso: Ramal e Senha.
  */
 class Gerente : public Pessoa {
@@ -119,13 +123,13 @@ inline Senha Gerente::getSenha() const{
 }
 
 /**
- * @class Hóspede
+ * @class Hospede
  * @brief Entidade que representa um Hóspede que fará reservas.
- * 
+ *
  * @details Herda de Pessoa e adiciona atributos necessários para o registro e
  * pagamento: Endereço e Cartão.
  */
-class Hospede : public Pessoa {
+class Hospede : public Pessoa { // CORREÇÃO: Nome da classe em maiúsculas (Hospede, não Hóspede)
     private:
         Endereco endereco;
         Cartao cartao;
@@ -173,10 +177,14 @@ inline Cartao Hospede::getCartao() const {
     return cartao;
 }
 
+// ====================================================================
+// ENTIDADES DE INFRAESTRUTURA
+// ====================================================================
+
 /**
  * @class Hotel
  * @brief Entidade que representa um Hotel geenciado pelo sistema.
- * 
+ *
  * @details Contém os dados de identificação e localização do hotel.
  * A chave primária(PK) do resgistro é o Codigo.
  */
