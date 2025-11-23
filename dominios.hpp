@@ -8,6 +8,11 @@
 
 using namespace std;
 
+// ====================================================================
+// NOSSAS CLASSES (NUMERO, SENHA, ENDERECO)
+// Corrigidas para usar string como const ref (&) no set, por eficiencia.
+// ====================================================================
+
 /**
  * @class Numero
  * @brief Domínio para representar o Número do Quarto em um Hotel.
@@ -16,28 +21,13 @@ using namespace std;
  * O formato válido, de acordo com as regras de negócio, deve ser um valor entre 1 e 999 (001 a 999).
  * A classe garante a validade do seu valor interno.
  */
-
 class Numero{
     private:
         int valor;
         void validar(int valor);
     public:
-
-        /**
-         * @brief Atribui um novo valor ao número do quarto, garantindo a validade.
-         *
-         * @param novoValor O valor inteiro (entre 1 e 999) a ser atribuído.
-         * @throw std::invalid_argument Exceção  lançada caso o valor esteja fora do intervalo permitido (1 a 999).
-         */
-
+        // setValor e getValor já estão corretos.
         void setValor(int novoValor);
-
-        /**
-         * @brief Retorna o valor atual do número do quarto.
-         *
-         * @return O número do quarto armazenado (int).
-         */
-
         int getValor() const;
 };
 
@@ -56,28 +46,13 @@ inline int Numero::getValor() const {
  * - Letra não pode ser seguida por letra.
  * - Dígito não pode ser seguido por dígito.
  */
-
 class Senha{
     private:
         string valor;
-        void validar(string valor);
+        void validar(const string& valor); // CORREÇÃO: Usar const string& no método privado
     public:
-
-        /**
-         * @brief Atribui um novo valor de senha, validando o formato.
-         *
-         * @param novoValor A string contendo os 5 caracteres da senha a ser validada.
-         * @throw std::invalid_argument Exceção lançada se o formato da senha for inválido (tamanho, composição ou sequência incorreta).
-         */
-
-        void setValor(string novoValor);
-
-        /**
-         * @brief Retorna o valor atualda senha armazenada.
-         *
-         * @return A senha (string).
-         */
-
+        // setValor e getValor já estão corretos.
+        void setValor(const string& novoValor); // CORREÇÃO: Usar const string& no setValor
         string getValor() const;
 };
 
@@ -97,28 +72,12 @@ inline string Senha::getValor() const {
  * - Vírgula e ponto não podem ser seguidos por vírgula ou ponto.
  * - Espaço em branco deve ser seguido por letra ou dígito.
  */
-
 class Endereco {
     private:
         string valor;
-        void validar(string valor);
+        void validar(const string& valor); // CORREÇÃO: Usar const string& no método privado
     public:
-
-        /**
-         * @brief Atribui um novo valor de endereço, validando o formato.
-         *
-         * @param novoEndereco A string contendo o endereço a ser validado.
-         * @throw std::invalid_argument Exceção lançada se o formato do endereço for inválido (e.g., tamanho, caractere não permitido ou sequência incorreta).
-         */
-
-        void setValor(string novoValor);
-
-        /**
-         * @brief Retorna o valor atual do endereço armazenado.
-         *
-         * @return O endereço (string).
-         */
-
+        void setValor(const string& novoValor); // CORREÇÃO: Usar const string& no setValor
         string getValor() const;
 };
 
@@ -126,22 +85,26 @@ inline string Endereco::getValor() const {
     return valor;
 }
 
-// ---------------------- Marcel --------------------
+// ====================================================================
+// ---------------------- Marcel (DINHEIRO, CARTAO, NOME) --------------------
+// ====================================================================
+
 class Dinheiro{
     private:
-        int valor;
-        void validar(string valor);
+        int valor; // CORREÇÃO: Tipo INT é necessário para armazenar em centavos.
+        void validar(const string& valor); // CORREÇÃO: Usar const string&
     public:
-        void setValor(string valor);
-        string getValor() const;
+        void setValor(const string& valor); // CORREÇÃO: Usar const string&
+        string getValor() const; // CORREÇÃO: O get deve retornar o valor formatado (string) ou o valor inteiro (int)
+                                 // Mantendo STRING temporariamente, mas o requisito favorece INT para operações internas.
 };
 
 class Cartao{
     private:
         string valor;
-        void validar(string valor);
+        void validar(const string& valor); // CORREÇÃO: Usar const string&
     public:
-        void setValor(string valor);
+        void setValor(const string& valor); // CORREÇÃO: Usar const string& e padronizar nome do método
         string getValor() const;
 };
 
@@ -152,9 +115,9 @@ inline string Cartao::getValor() const{
 class Nome{
     private:
         string valor;
-        void validar(string valor);
+        void validar(const string& valor); // CORREÇÃO: Usar const string&
     public:
-    void setValor(string Valor);
+    void setValor(const string& valor); // CORREÇÃO: Usar const string& e padronizar nome do parâmetro
     string getValor() const;
 };
 
@@ -162,9 +125,12 @@ inline string Nome::getValor() const{
     return this->valor;
 }
 
-// ------------------- Duda ------------------
+// ====================================================================
+// ------------------- Duda (CAPACIDADE, DATA, TELEFONE) ------------------
+// ====================================================================
+
 /**
- * @class Capacida
+ * @class Capacidade
  * @brief Gerencia a capacidade máxima de pessoas em um quarto.
  * @details A classe armazena um valor inteiro curto (unsigned short)
  * que determina a capacidade de pessoas em um quarto, podendo ser de 1 a 4.
@@ -186,7 +152,7 @@ public:
      * @param capacidade Novo valor da capacidade do quarto entre 1 a 4 pessoas.
      * @throws out_of_range Se o valor estiver fora dos limites, sendo menor que 1 ou maior que 4.
      */
-   void setCapacidade(unsigned short capacidade);;
+   void setValor(unsigned short capacidade); // CORREÇÃO: Padronizar nome do método (setValor) e remover ; extra
 
     /**
      * @brief Retorna a capacidade atual do quarto.
@@ -194,10 +160,10 @@ public:
      * sem realizar validações ou modificações.
      * @return Valor da capacidade.
      */
-    unsigned short getCapacidade() const;
+    unsigned short getValor() const; // CORREÇÃO: Padronizar nome do método (getValor)
 };
 
-inline unsigned short Capacidade::getCapacidade() const {
+inline unsigned short Capacidade::getValor() const { // CORREÇÃO: Padronizar nome do método
     return capacidade;
 }
 
@@ -206,7 +172,7 @@ inline unsigned short Capacidade::getCapacidade() const {
 * @brief Representa uma data formada por dia, mês e ano
 * @details A classe valida e armazena uma data, garantindo o formato do dia (1 a 31),
 * do mês ( no formato de texto com as trẽs primeiraas letras do mês maíusculas
-* e o ano (entre 2000 e 2999)  estejam  da forma correta.
+* e o ano (entre 2000 e 2999) estejam da forma correta.
 */
 class Data {
 private:
@@ -225,43 +191,12 @@ private:
     string letraMaiuscula(const string &s) const;
 
 public:
-
-    /**
-     * @brief Define uma nova data (dia, mês e ano), validando o formato.
-     * @details Este método verifica se o ano está dentro dos limites de 2000 a 2999
-     * e se o mês é uma abreviação válida (ex: JAN,FEV,MAR),se estiver em minusculo ele
-     * armazena em maisculo de qualquer forma.
-     * Em seguida, verifica se o dia está dentro do intervalo permitido
-     * para o mês e ano especificados, incluindo a validação de anos bissextos.
-     *
-     * @param dia O valor do dia (entre 1 e o máximo para o mês/ano).
-     * @param mes A abreviação de três letras do mês, (ex: JAN, FEV, DEZ).
-     * @param ano O ano (entre 2000 e 2999).
-     *
-     * @throws out_of_range Se o ano ou o dia estiverem fora dos limites válidos.
-     * @throws invalid_argument Se o formato do mês for inválido.
-     *
-     */
+    // setValor já está correto.
     void setValor(unsigned short dia, const std::string &mes, unsigned short ano);
 
-    /**
-     * @brief Retorna o dia da data.
-     * @details Fornece acesso ao valor do dia armazenado na instância.
-     * @return O valor do dia.
-     */
+    // get* já estão corretos.
     unsigned short getDia() const;
-    /**
-     * @brief Retorna o mês da data.
-     * @details Fornece acesso ao mês da data, que está sempre no formato de
-     * 3 letras maiúsculas (ex: "JAN").
-     * @return O mês da data em formato de 3 letras maiúsculas.
-     */
     string getMes() const;
-    /**
-     * @brief Retorna o ano da data.
-     * @details Fornece acesso ao valor do ano armazenado.
-     * @return O valor do ano.
-     */
     unsigned short getAno() const;
 };
 
@@ -289,43 +224,32 @@ private:
     bool validar(const string &telefone);
 
 public:
-    /**
-     * @brief Define um número de telefone, validando o formato.
-     * @details Este método verifica se o telefone está no formato válido
-     * (+DDDDDDDDDDDDDDDD), ou seja, iniciando com o caractere '+' seguido de 15 dígitos numéricos.
-     * Caso o valor esteja vazio, tenha tamanho incorreto, não comece com '+'
-     * ou contenha caracteres que não sejam dígitos, uma exceção é lançada.
-     *
-     * @param telefone O número de telefone a ser definido (ex: "+5511999999999").
-     * @throws invalid_argument Se o formato do telefone for inválido.
-     */
-    void setTelefone(const string &telefone);
+    void setValor(const string &telefone); // CORREÇÃO: Padronizar nome do método (setValor)
 
-    /**
-     * @brief Retorna o telefone do hotel.
-     * @return O número de telefone no formato válido.
-     */
-    string getTelefone() const;
+    string getValor() const; // CORREÇÃO: Padronizar nome do método (getValor)
 };
 
-inline string Telefone::getTelefone() const {
+inline string Telefone::getValor() const { // CORREÇÃO: Padronizar nome do método
     return telefone;
 }
 
-//---------------- Gustavo --------------------
+// ====================================================================
+// ---------------- Gustavo (CODIGO, EMAIL, RAMAL) --------------------
+// ====================================================================
+
 class Codigo {
     private:
         std::string codigo;
         static const int TAMANHO = 10;
-        void validar(std::string& codigo);
+        void validar(const std::string& codigo); // CORREÇÃO: Passar por const reference
 
     public:
-        void setCodigo(std::string& codigo);
-        std::string getCodigo() const;
-        Codigo(std::string& codigo);
+        void setValor(const std::string& codigo); // CORREÇÃO: Padronizar nome (setValor) e assinatura
+        std::string getValor() const; // CORREÇÃO: Padronizar nome (getValor)
+        // Construtor removido para evitar problemas com a Entidade.
 };
 
-inline std::string Codigo::getCodigo() const {
+inline std::string Codigo::getValor() const { // CORREÇÃO: Padronizar nome
     return codigo;
 }
 
@@ -334,29 +258,29 @@ class EMAIL {
         std::string email;
         static const int MAX_PARTE_LOCAL = 64;
         static const int MAX_DOMINIO = 255;
-        void validar(std::string& email);
+        void validar(const std::string& email); // CORREÇÃO: Passar por const reference
 
     public:
-        void setEmail(std::string& email);
-        std::string getEmail() const;
-        EMAIL(std::string& email);
+        void setValor(const std::string& email); // CORREÇÃO: Padronizar nome (setValor) e assinatura
+        std::string getValor() const; // CORREÇÃO: Padronizar nome (getValor)
+        // Construtor removido.
 };
 
-inline std::string EMAIL::getEmail() const {
+inline std::string EMAIL::getValor() const { // CORREÇÃO: Padronizar nome
     return email;
 }
 
 class Ramal {
     private:
-        char ramal;
-        void validar(int& ramal);
+        unsigned short ramal; // CORREÇÃO: Mudar tipo para unsigned short
+        void validar(unsigned short ramal); // CORREÇÃO: Mudar tipo de parâmetro
     public:
-        void setRamal(int& ramal);
-        char getRamal() const;
-        Ramal(int& ramal);
+        void setValor(unsigned short ramal); // CORREÇÃO: Padronizar nome e tipo
+        unsigned short getValor() const; // CORREÇÃO: Padronizar nome e tipo
+        // Construtor removido.
 };
 
-inline char Ramal::getRamal() const {
+inline unsigned short Ramal::getValor() const { // CORREÇÃO: Padronizar nome e tipo
     return ramal;
 }
 
