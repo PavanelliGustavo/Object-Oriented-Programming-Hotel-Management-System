@@ -2,7 +2,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <sstream>
-#include <limits> 
+#include <limits>
 
 using namespace std;
 
