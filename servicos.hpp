@@ -1,13 +1,17 @@
 #ifndef SERVICOS_HPP_INCLUDED
 #define SERVICOS_HPP_INCLUDED
 
-#include "interfaces.hpp" // Depende das interfaces (ILN...)
+#include "interfaces.hpp" // Contém ISAutenticacao, ISPessoa, ISReserva
+#include "dominios.hpp"
+#include <list>
+
+using namespace std;
 
 // ====================================================================
-// Declarações Forward (Para evitar includes desnecessários no .hpp)
-// Assume-se que estas classes Contêineres existem
+// DECLARAÇÕES FORWARD (Simulação de Banco de Dados)
 // ====================================================================
-
+// Estas classes "Container" serão responsáveis por armazenar os dados
+// em memória (map, vector) ou banco de dados (SQLite).
 class ContainerGerente;
 class ContainerHospede;
 class ContainerHotel;
@@ -15,112 +19,62 @@ class ContainerQuarto;
 class ContainerReserva;
 
 // ====================================================================
-// 1. CONTROLADORA DE SERVIÇO: AUTENTICAÇÃO
+// 1. MÓDULO DE SERVIÇO: AUTENTICAÇÃO (MSA)
 // ====================================================================
 
-class CntrLNAutenticacao : public ILNAutenticacao {
+class CntrMSAutenticacao : public ISAutenticacao {
 private:
-    ContainerGerente* containerGerentes; // Referência ao contêiner de dados
+    ContainerGerente* container; // Acesso aos dados de gerentes para verificar senha
 
 public:
-    // Implementação da interface
+    // Implementação do método da interface ISAutenticacao
     bool autenticar(const EMAIL& email, const Senha& senha) override;
 
-    // Método de Injeção de Dependência
-    void setContainer(ContainerGerente* container) { this->containerGerentes = container; }
+    // Injeção de dependência do container (Banco de Dados)
+    void setContainer(ContainerGerente* container) { this->container = container; }
 };
 
 // ====================================================================
-// 2. CONTROLADORA DE SERVIÇO: PESSOAS (GERENTE E HÓSPEDE)
+// 2. MÓDULO DE SERVIÇO: PESSOAL (MSP)
 // ====================================================================
 
-class CntrLNPessoa : public ILNPessoa {
+class CntrMSPessoa : public ISPessoa {
 private:
     ContainerGerente* containerGerentes;
     ContainerHospede* containerHospedes;
 
 public:
-    // Implementação dos métodos de Gerente
+    // --- CRUD Gerente ---
     bool criarGerente(const Gerente& gerente) override;
     bool deletarGerente(const EMAIL& email) override;
     bool atualizarGerente(const Gerente& gerente) override;
     Gerente lerGerente(const EMAIL& email) override;
     list<Gerente> listarGerentes() override;
 
-    // Implementação dos métodos de Hóspede
+    // --- CRUD Hóspede ---
     bool criarHospede(const Hospede& hospede) override;
     bool deletarHospede(const EMAIL& email) override;
     bool atualizarHospede(const Hospede& hospede) override;
     Hospede lerHospede(const EMAIL& email) override;
     list<Hospede> listarHospedes() override;
 
-    // Métodos de Injeção de Dependência
+    // Injeção de Dependências
     void setContainerGerente(ContainerGerente* container) { this->containerGerentes = container; }
     void setContainerHospede(ContainerHospede* container) { this->containerHospedes = container; }
 };
 
 // ====================================================================
-// 3. CONTROLADORA DE SERVIÇO: RESERVAS (SEU SUBSISTEMA)
+// 3. MÓDULO DE SERVIÇO: RESERVAS E INFRAESTRUTURA (MSR)
 // ====================================================================
 
-class CntrLNReserva : public ILNReserva {
+class CntrMSReserva : public ISReserva {
 private:
     ContainerReserva* containerReservas;
-    // Opcional: ContainerQuarto* containerQuartos; para lógica de conflito.
-
-public:
-    // Implementação dos métodos da interface ILNReserva
-    bool criarReserva(const Reserva& reserva) override;
-    bool deletarReserva(const Codigo& codigo) override;
-    bool atualizarReserva(const Reserva& reserva) override;
-    Reserva lerReserva(const Codigo& codigo) override;
-    list<Reserva> listarReservas() override;
-
-    // Método de Injeção de Dependência
-    void setContainer(ContainerReserva* container) { this->containerReservas = container; }
-};
-
-// ====================================================================
-// 4. INTERFACE E CONTROLADORA DE SERVIÇO DE HOTEL/QUARTO
-// ====================================================================
-
-/**
- * @class ILNHotel
- * @brief Interface para o Módulo de Serviço de Hotel e Quarto.
- *
- * @details Define os serviços CRUD e de listagem para as Entidades Hotel e Quarto.
- */
-class ILNHotel {
-public:
-    // --- Hotel CRUD ---
-    virtual bool criarHotel(const Hotel& hotel) = 0;
-    virtual bool deletarHotel(const Codigo& codigo) = 0;
-    virtual bool atualizarHotel(const Hotel& hotel) = 0;
-    virtual Hotel lerHotel(const Codigo& codigo) = 0;
-    virtual list<Hotel> listarHoteis() = 0;
-
-    // --- Quarto CRUD ---
-    virtual bool criarQuarto(const Quarto& quarto) = 0;
-    virtual bool deletarQuarto(const Numero& numero) = 0;
-    virtual bool atualizarQuarto(const Quarto& quarto) = 0;
-    virtual Quarto lerQuarto(const Numero& numero) = 0;
-    virtual list<Quarto> listarQuartos() = 0;
-
-    virtual ~ILNHotel() {}
-};
-
-
-/**
- * @class CntrLNHotel
- * @brief Controladora que implementa a lógica de negócio para Hotel e Quarto.
- */
-class CntrLNHotel : public ILNHotel {
-private:
     ContainerHotel* containerHoteis;
     ContainerQuarto* containerQuartos;
 
 public:
-    // Implementação dos métodos de ILNHotel
+    // --- CRUD Infraestrutura (Hotel e Quarto) ---
     bool criarHotel(const Hotel& hotel) override;
     bool deletarHotel(const Codigo& codigo) override;
     bool atualizarHotel(const Hotel& hotel) override;
@@ -133,9 +87,17 @@ public:
     Quarto lerQuarto(const Numero& numero) override;
     list<Quarto> listarQuartos() override;
 
-    // Métodos de Injeção de Dependência
-    void setContainerHotel(ContainerHotel* container) { this->containerHoteis = container; }
-    void setContainerQuarto(ContainerQuarto* container) { this->containerQuartos = container; }
+    // --- CRUD Reservas ---
+    bool criarReserva(const Reserva& reserva) override;
+    bool deletarReserva(const Codigo& codigo) override;
+    bool atualizarReserva(const Reserva& reserva) override;
+    Reserva lerReserva(const Codigo& codigo) override;
+    list<Reserva> listarReservas() override;
+
+    // Injeção de Dependências
+    void setContainerReserva(ContainerReserva* cR) { this->containerReservas = cR; }
+    void setContainerHotel(ContainerHotel* cH) { this->containerHoteis = cH; }
+    void setContainerQuarto(ContainerQuarto* cQ) { this->containerQuartos = cQ; }
 };
 
 #endif // SERVICOS_HPP_INCLUDED
