@@ -2,7 +2,6 @@
 #define SERVICOS_HPP_INCLUDED
 
 #include "interfaces.hpp" // Depende das interfaces (ILN...)
-// #include "containers.hpp" // Contêineres serão usados na implementação do .cpp
 
 // ====================================================================
 // Declarações Forward (Para evitar includes desnecessários no .hpp)
@@ -67,9 +66,7 @@ public:
 class CntrLNReserva : public ILNReserva {
 private:
     ContainerReserva* containerReservas;
-    // Note que uma reserva envolve quartos, então esta controladora
-    // precisará de uma referência à lógica/dados de quartos para checar conflitos.
-    // ContainerQuarto* containerQuartos; // Exemplo de dependência extra
+    // Opcional: ContainerQuarto* containerQuartos; para lógica de conflito.
 
 public:
     // Implementação dos métodos da interface ILNReserva
@@ -84,7 +81,7 @@ public:
 };
 
 // ====================================================================
-// 4. ADIÇÃO CRÍTICA: INTERFACE E CONTROLADORA DE SERVIÇO DE HOTEL/QUARTO
+// 4. INTERFACE E CONTROLADORA DE SERVIÇO DE HOTEL/QUARTO
 // ====================================================================
 
 /**
