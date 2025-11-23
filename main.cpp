@@ -1,134 +1,117 @@
 #include <iostream>
 #include <stdexcept>
+#include <locale.h>
+
+// Inclui todas as camadas
 #include "dominios.hpp"
 #include "entidades.hpp"
 #include "interfaces.hpp"
-#include "servicos.hpp"
 #include "containers.hpp"
+#include "servicos.hpp"
 #include "apresentacao.hpp"
-#include "testes.hpp"
-#include <exception>
 
 using namespace std;
 
-// Funcao auxiliar para rodar e reportar o resultado dos testes
-void rodarTestes() {
-    cout << "=========================================\n";
-    cout << "         EXECUTANDO TESTES DE UNIDADE\n";
-    cout << "=========================================\n";
-
-    // Testes de Domínio e Entidade declarados para execução
-    TUNumero tuNumero;
-    TUSenha tuSenha;
-    TUEndereco tuEndereco;
-    TUPessoa tuPessoa;
-    TUGerente tuGerente;
-
-    // --- Testes de Domínio ---
-    cout << "Teste TUNumero (Dominio): " << (tuNumero.run() == SUCESSO ? "SUCESSO" : "FALHA") << endl;
-    cout << "Teste TUSenha (Dominio): " << (tuSenha.run() == SUCESSO ? "SUCESSO" : "FALHA") << endl;
-    cout << "Teste TUEndereco (Dominio): " << (tuEndereco.run() == SUCESSO ? "SUCESSO" : "FALHA") << endl;
-
-    // --- Testes de Entidade ---
-    cout << "Teste TUPessoa (Entidade): " << (tuPessoa.run() == SUCESSO ? "SUCESSO" : "FALHA") << endl;
-    cout << "Teste TUGerente (Entidade): " << (tuGerente.run() == SUCESSO ? "SUCESSO" : "FALHA") << endl;
-
-    cout << "=========================================\n\n";
-}
-
 int main() {
-    // 1. RODAR TESTES DE UNIDADE
-    rodarTestes();
+    // Configura acentuação para o console (pode variar dependendo do SO)
+    setlocale(LC_ALL, "Portuguese");
 
-    // 2. DECLARAÇÃO DE VARIÁVEIS DO SISTEMA
+    cout << "Iniciando Sistema de Gestao Hoteleira..." << endl;
 
-    // --- Contêineres (Camada de Dados) ---
-    ContainerGerente containerGerentes;
-    ContainerReserva containerReservas;
-    ContainerHospede containerHospedes;
-    ContainerHotel containerHoteis;
-    ContainerQuarto containerQuartos;
-
-    // --- Controladoras de Serviço (Camada de Serviço - LN) ---
-    CntrLNAutenticacao ctrlLNAutenticacao;
-    CntrLNPessoa ctrlLNPessoa;
-    CntrLNReserva ctrlLNReserva;
-    CntrLNHotel ctrlLNHotel;
-
-    // --- Controladoras de Apresentação (Camada de Apresentação - IU) ---
-    CntrIUAutenticacao ctrlIUAutenticacao;
-    CntrIUIntegracao ctrlIUIntegracao; // Menu Principal
-    CntrIUReserva ctrlIUReserva; // Seu subsistema (MAR)
-
-    // 3. INJEÇÃO DE DEPENDÊNCIA (LIGANDO AS CAMADAS)
-
-    // A. Ligar Controladoras de Serviço aos seus Contêineres (Dados)
-    ctrlLNAutenticacao.setContainer(&containerGerentes);
-
-    ctrlLNPessoa.setContainerGerente(&containerGerentes);
-    ctrlLNPessoa.setContainerHospede(&containerHospedes);
-
-    ctrlLNReserva.setContainer(&containerReservas);
-
-    ctrlLNHotel.setContainerHotel(&containerHoteis);
-    ctrlLNHotel.setContainerQuarto(&containerQuartos);
-
-
-    // B. Ligar Camada de Apresentação à Camada de Serviço (Interfaces)
-
-    // Login -> Serviço de Autenticação
-    ctrlIUAutenticacao.setInterfaceServico(&ctrlLNAutenticacao);
-
-    // Reservas -> Serviço de Reservas
-    ctrlIUReserva.setInterfaceServico(&ctrlLNReserva);
-
-
-    // C. Ligar Módulos de Apresentação entre si (Navegação)
-
-    // Login -> Menu Principal (MAI)
-    ctrlIUAutenticacao.setControladorIntegracao(&ctrlIUIntegracao);
-
-    // Menu Principal (MAI) -> Menu de Reservas (MAR) [CORREÇÃO APLICADA]
-    ctrlIUIntegracao.setCtrlReserva(&ctrlIUReserva);
-
-
-    // 4. PREPARAÇÃO DE DADOS INICIAIS (Smoke Test)
     try {
-        EMAIL emailInicial;
-        emailInicial.setValor("admin@hotel.com");
+        // ====================================================================
+        // 1. INSTANCIAÇÃO DOS CONTAINERS (BANCO DE DADOS EM MEMÓRIA)
+        // ====================================================================
+        ContainerGerente   cGerente;
+        ContainerHospede   cHospede;
+        ContainerHotel     cHotel;
+        ContainerQuarto    cQuarto;
+        ContainerReserva   cReserva;
 
-        Senha senhaInicial;
-        senhaInicial.setValor("A1!b#");
+        // ====================================================================
+        // 2. INSTANCIAÇÃO DA CAMADA DE SERVIÇO (MS)
+        // ====================================================================
+        CntrMSAutenticacao msAutenticacao;
+        CntrMSPessoa       msPessoa;
+        CntrMSReserva      msReserva;
 
-        Nome nomeInicial;
-        nomeInicial.setValor("Admin Hotel");
+        // INJEÇÃO DE DEPENDÊNCIA: SERVIÇO -> CONTAINER
+        msAutenticacao.setContainer(&cGerente);
 
-        Ramal ramalInicial;
-        ramalInicial.setValor(10);
+        msPessoa.setContainerGerente(&cGerente);
+        msPessoa.setContainerHospede(&cHospede);
 
-        Gerente gerenteInicial;
-        gerenteInicial.setEmail(emailInicial);
-        gerenteInicial.setSenha(senhaInicial);
-        gerenteInicial.setNome(nomeInicial);
-        gerenteInicial.setRamal(ramalInicial);
+        msReserva.setContainerReserva(&cReserva);
+        msReserva.setContainerHotel(&cHotel);
+        msReserva.setContainerQuarto(&cQuarto);
 
-        // O setValor dos Domínios Nome e Ramal precisam ser chamados aqui
-        // O código está correto, assumindo que os setValor dos Domínios Name e Ramal estão corretos
+        // ====================================================================
+        // 3. INSTANCIAÇÃO DA CAMADA DE APRESENTAÇÃO (MA)
+        // ====================================================================
+        CntrMAAutenticacao maAutenticacao;
+        CntrMAPessoal      maPessoal;
+        CntrMAReserva      maReserva;
 
-        containerGerentes.incluir(gerenteInicial);
-        cout << "SUCESSO: Gerente inicial 'admin@hotel.com' inserido para teste.\n";
+        // INJEÇÃO DE DEPENDÊNCIA: APRESENTAÇÃO -> SERVIÇO
+        maAutenticacao.setISAutenticacao(&msAutenticacao);
+
+        maPessoal.setISPessoa(&msPessoa);
+
+        maReserva.setISReserva(&msReserva);
+        maReserva.setISPessoa(&msPessoa); // MAR precisa listar hóspedes
+
+        // ====================================================================
+        // 4. INSTANCIAÇÃO E CONFIGURAÇÃO DA INTEGRAÇÃO (MAI)
+        // ====================================================================
+        CntrMAIntegracao mai;
+
+        // INJEÇÃO DE DEPENDÊNCIA: INTEGRAÇÃO -> MÓDULOS DE APRESENTAÇÃO
+        mai.setCntrAutenticacao(&maAutenticacao);
+        mai.setCntrPessoal(&maPessoal);
+        mai.setCntrReserva(&maReserva);
+
+        // ====================================================================
+        // 5. CARGA INICIAL DE DADOS (PARA TESTE FUMAÇA)
+        // ====================================================================
+        // Criar um Gerente padrão para permitir o primeiro login.
+        try {
+            Gerente admin;
+
+            Nome nome; nome.setValor("Administrador");
+            EMAIL email; email.setValor("admin@hotel.com");
+            Senha senha; senha.setValor("A1b!2"); // 5 chars: Maiusc, Minusc, Digito, Especial
+            Ramal ramal; ramal.setValor(1);
+
+            admin.setNome(nome);
+            admin.setEmail(email);
+            admin.setSenha(senha);
+            admin.setRamal(ramal);
+
+            // Usa o serviço para incluir (valida regras de negócio)
+            // Como estamos acessando direto o container para setup, podemos usar o método incluir direto
+            // ou usar o serviço msPessoa. Vamos usar o container direto para setup rápido.
+            cGerente.incluir(admin);
+
+            cout << "\n[SETUP] Usuario Admin criado com sucesso!" << endl;
+            cout << "EMAIL: admin@hotel.com" << endl;
+            cout << "SENHA: A1b!2" << endl;
+            cout << "-------------------------------------------------------" << endl;
+
+        } catch (const exception& e) {
+            cout << "[ERRO SETUP] Falha ao criar usuario admin: " << e.what() << endl;
+            return 1;
+        }
+
+        // ====================================================================
+        // 6. EXECUÇÃO DO SISTEMA
+        // ====================================================================
+        mai.executar();
 
     } catch (const exception& e) {
-        cerr << "ERRO FATAL: Falha ao inserir dados iniciais: " << e.what() << endl;
+        cout << "ERRO FATAL NO SISTEMA: " << e.what() << endl;
         return 1;
     }
 
-    // 5. EXECUÇÃO DO SISTEMA (Chamada ao Módulo de Entrada - Login)
-
-    if (ctrlIUAutenticacao.executar()) {
-        // Se a autenticação foi bem-sucedida, executa o Menu Principal
-        ctrlIUIntegracao.executar();
-    }
-
+    cout << "\nSistema encerrado. Obrigado!" << endl;
     return 0;
 }
