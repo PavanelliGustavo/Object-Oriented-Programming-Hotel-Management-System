@@ -3,6 +3,93 @@
 
 #include "interfaces.hpp"
 #include "dominios.hpp"
+#include <iostream>
+
+using namespace std;
+
+// Forward Declaration do Menu Principal (para ser usado após autenticação)
+class CntrIUIntegracao; 
+
+// ====================================================================
+// INTERFACE DE APRESENTAÇÃO (GERAL)
+// ====================================================================
+
+/**
+ * @class IUIAutenticacao
+ * @brief Interface para o Módulo de Apresentação de Autenticação (MAA).
+ *
+ * @details Define o contrato para a interação com o usuário na tela de login.
+ */
+class IUIAutenticacao {
+public:
+    virtual void setInterfaceServico(ILNAutenticacao* interface) = 0;
+    virtual void setControladorIntegracao(CntrIUIntegracao* controlador) = 0;
+    virtual bool executar() = 0; // Retorna true se a autenticação for bem-sucedida
+    virtual ~IUIAutenticacao() {}
+};
+
+
+// ====================================================================
+// CONTROLADORA DE APRESENTAÇÃO: AUTENTICAÇÃO (MAA)
+// ====================================================================
+
+/**
+ * @class CntrIUAutenticacao
+ * @brief Implementa a lógica da tela de login.
+ *
+ * @details Coleta EMAIL e Senha do usuário e delega a verificação à Camada de Serviço.
+ */
+class CntrIUAutenticacao : public IUIAutenticacao {
+private:
+    ILNAutenticacao* servicoAutenticacao; // Referência à Camada de Serviço
+    CntrIUIntegracao* controladorIntegracao; // Referência ao Menu Principal
+
+public:
+    // Métodos de Injeção de Dependência
+    void setInterfaceServico(ILNAutenticacao* interface) override {
+        this->servicoAutenticacao = interface;
+    }
+    void setControladorIntegracao(CntrIUIntegracao* controlador) override {
+        this->controladorIntegracao = controlador;
+    }
+    
+    // Método principal de execução
+    bool executar() override;
+};
+
+
+// ====================================================================
+// CONTROLADORA DE APRESENTAÇÃO: INTEGRAÇÃO (MAI) - PASSO 6
+// ====================================================================
+
+/**
+ * @class CntrIUIntegracao
+ * @brief Controladora de Integração e Menu Principal do Sistema (MAI).
+ *
+ * @details Gerencia a navegação de alto nível após o login e o encerramento do sistema.
+ */
+class CntrIUIntegracao {
+private:
+    // Referências para as Controladoras de Apresentação de cada subsistema
+    // (A ser injetada no main.cpp)
+    // IUIReserva* ctrlReserva; 
+    // IUIPessoa* ctrlPessoa; 
+    
+    bool autenticado; // Flag para saber se o usuário está logado
+    
+public:
+    CntrIUIntegracao() : autenticado(false) {}
+
+    // void setCtrlReserva(IUIReserva* ctrl) { this->ctrlReserva = ctrl; }
+
+    void executar() {
+        // Lógica do menu principal (será implementada no .cpp)
+    }
+    
+    void setAutenticado(bool status) {
+        this->autenticado = status;
+    }
+};
 
 // ====================================================================
 // INTERFACE DE APRESENTAÇÃO (GERAL)
