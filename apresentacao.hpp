@@ -1,147 +1,141 @@
-#ifndef APRESENTACAO_HPP_INCLUDED
-#define APRESENTACAO_HPP_INCLUDED
+#ifndef SERVICOS_HPP_INCLUDED
+#define SERVICOS_HPP_INCLUDED
 
-#include "interfaces.hpp"
-#include "dominios.hpp"
-#include <iostream>
-
-using namespace std;
-
-// Forward Declaration do Menu Principal (para ser usado após autenticação)
-class CntrIUIntegracao; 
+#include "interfaces.hpp" // Depende das interfaces (ILN...)
 
 // ====================================================================
-// INTERFACE DE APRESENTAÇÃO (GERAL)
+// Declarações Forward (Para evitar includes desnecessários no .hpp)
+// Assume-se que estas classes Contêineres existem
 // ====================================================================
 
-/**
- * @class IUIAutenticacao
- * @brief Interface para o Módulo de Apresentação de Autenticação (MAA).
- *
- * @details Define o contrato para a interação com o usuário na tela de login.
- */
-class IUIAutenticacao {
+class ContainerGerente;
+class ContainerHospede;
+class ContainerHotel;
+class ContainerQuarto;
+class ContainerReserva;
+
+// ====================================================================
+// 1. CONTROLADORA DE SERVIÇO: AUTENTICAÇÃO
+// ====================================================================
+
+class CntrLNAutenticacao : public ILNAutenticacao {
+private:
+    ContainerGerente* containerGerentes; // Referência ao contêiner de dados
+
 public:
-    virtual void setInterfaceServico(ILNAutenticacao* interface) = 0;
-    virtual void setControladorIntegracao(CntrIUIntegracao* controlador) = 0;
-    virtual bool executar() = 0; // Retorna true se a autenticação for bem-sucedida
-    virtual ~IUIAutenticacao() {}
+    // Implementação da interface
+    bool autenticar(const EMAIL& email, const Senha& senha) override;
+
+    // Método de Injeção de Dependência
+    void setContainer(ContainerGerente* container) { this->containerGerentes = container; }
 };
 
-
 // ====================================================================
-// CONTROLADORA DE APRESENTAÇÃO: AUTENTICAÇÃO (MAA)
+// 2. CONTROLADORA DE SERVIÇO: PESSOAS (GERENTE E HÓSPEDE)
 // ====================================================================
 
-/**
- * @class CntrIUAutenticacao
- * @brief Implementa a lógica da tela de login.
- *
- * @details Coleta EMAIL e Senha do usuário e delega a verificação à Camada de Serviço.
- */
-class CntrIUAutenticacao : public IUIAutenticacao {
+class CntrLNPessoa : public ILNPessoa {
 private:
-    ILNAutenticacao* servicoAutenticacao; // Referência à Camada de Serviço
-    CntrIUIntegracao* controladorIntegracao; // Referência ao Menu Principal
+    ContainerGerente* containerGerentes;
+    ContainerHospede* containerHospedes;
 
 public:
+    // Implementação dos métodos de Gerente
+    bool criarGerente(const Gerente& gerente) override;
+    bool deletarGerente(const EMAIL& email) override;
+    bool atualizarGerente(const Gerente& gerente) override;
+    Gerente lerGerente(const EMAIL& email) override;
+    list<Gerente> listarGerentes() override;
+
+    // Implementação dos métodos de Hóspede
+    bool criarHospede(const Hospede& hospede) override;
+    bool deletarHospede(const EMAIL& email) override;
+    bool atualizarHospede(const Hospede& hospede) override;
+    Hospede lerHospede(const EMAIL& email) override;
+    list<Hospede> listarHospedes() override;
+
     // Métodos de Injeção de Dependência
-    void setInterfaceServico(ILNAutenticacao* interface) override {
-        this->servicoAutenticacao = interface;
-    }
-    void setControladorIntegracao(CntrIUIntegracao* controlador) override {
-        this->controladorIntegracao = controlador;
-    }
-    
-    // Método principal de execução
-    bool executar() override;
+    void setContainerGerente(ContainerGerente* container) { this->containerGerentes = container; }
+    void setContainerHospede(ContainerHospede* container) { this->containerHospedes = container; }
 };
 
-
 // ====================================================================
-// CONTROLADORA DE APRESENTAÇÃO: INTEGRAÇÃO (MAI) - PASSO 6
+// 3. CONTROLADORA DE SERVIÇO: RESERVAS (SEU SUBSISTEMA)
 // ====================================================================
 
-/**
- * @class CntrIUIntegracao
- * @brief Controladora de Integração e Menu Principal do Sistema (MAI).
- *
- * @details Gerencia a navegação de alto nível após o login e o encerramento do sistema.
- */
-class CntrIUIntegracao {
+class CntrLNReserva : public ILNReserva {
 private:
-    // Referências para as Controladoras de Apresentação de cada subsistema
-    // (A ser injetada no main.cpp)
-    // IUIReserva* ctrlReserva; 
-    // IUIPessoa* ctrlPessoa; 
-    
-    bool autenticado; // Flag para saber se o usuário está logado
+    ContainerReserva* containerReservas;
+    // Opcional: ContainerQuarto* containerQuartos; para lógica de conflito.
     
 public:
-    CntrIUIntegracao() : autenticado(false) {}
+    // Implementação dos métodos da interface ILNReserva
+    bool criarReserva(const Reserva& reserva) override;
+    bool deletarReserva(const Codigo& codigo) override;
+    bool atualizarReserva(const Reserva& reserva) override;
+    Reserva lerReserva(const Codigo& codigo) override;
+    list<Reserva> listarReservas() override;
 
-    // void setCtrlReserva(IUIReserva* ctrl) { this->ctrlReserva = ctrl; }
-
-    void executar() {
-        // Lógica do menu principal (será implementada no .cpp)
-    }
-    
-    void setAutenticado(bool status) {
-        this->autenticado = status;
-    }
+    // Método de Injeção de Dependência
+    void setContainer(ContainerReserva* container) { this->containerReservas = container; }
 };
 
 // ====================================================================
-// INTERFACE DE APRESENTAÇÃO (GERAL)
+// 4. INTERFACE E CONTROLADORA DE SERVIÇO DE HOTEL/QUARTO
 // ====================================================================
 
 /**
- * @class IUIReserva
- * @brief Interface para o Módulo de Apresentação de Reservas (MAR).
+ * @class ILNHotel
+ * @brief Interface para o Módulo de Serviço de Hotel e Quarto.
  *
- * @details Define o contrato para a interação com o usuário, exigindo uma referência
- * à interface de Serviço de Reservas para acessar a lógica de negócio.
+ * @details Define os serviços CRUD e de listagem para as Entidades Hotel e Quarto.
  */
-class IUIReserva {
+class ILNHotel {
 public:
-    virtual void setInterfaceServico(ILNReserva* interface) = 0;
-    virtual void executar() = 0; // Método principal que exibe o menu/inicia a interação
-    virtual ~IUIReserva() {}
+    // --- Hotel CRUD ---
+    virtual bool criarHotel(const Hotel& hotel) = 0;
+    virtual bool deletarHotel(const Codigo& codigo) = 0;
+    virtual bool atualizarHotel(const Hotel& hotel) = 0;
+    virtual Hotel lerHotel(const Codigo& codigo) = 0;
+    virtual list<Hotel> listarHoteis() = 0;
+
+    // --- Quarto CRUD ---
+    virtual bool criarQuarto(const Quarto& quarto) = 0;
+    virtual bool deletarQuarto(const Numero& numero) = 0;
+    virtual bool atualizarQuarto(const Quarto& quarto) = 0;
+    virtual Quarto lerQuarto(const Numero& numero) = 0;
+    virtual list<Quarto> listarQuartos() = 0;
+
+    virtual ~ILNHotel() {}
 };
 
-// ====================================================================
-// CONTROLADORA DE APRESENTAÇÃO (MAR)
-// ====================================================================
 
 /**
- * @class CntrIUReserva
- * @brief Implementação da controladora de Interface com o Usuário para Reservas.
- *
- * @details É responsável por coletar dados do usuário, validar o formato inicial (usando Domínios)
- * e delegar as ações à Camada de Serviço através da interface ILNReserva.
+ * @class CntrLNHotel
+ * @brief Controladora que implementa a lógica de negócio para Hotel e Quarto.
  */
-class CntrIUReserva : public IUIReserva {
+class CntrLNHotel : public ILNHotel {
 private:
-    ILNReserva* servicoReservas; // Referência à interface de SERVIÇO (MSR)
+    ContainerHotel* containerHoteis;
+    ContainerQuarto* containerQuartos;
 
 public:
-    // Método de Injeção de Dependência (implementa IUIReserva)
-    void setInterfaceServico(ILNReserva* interface) override {
-        this->servicoReservas = interface;
-    }
+    // Implementação dos métodos de ILNHotel
+    bool criarHotel(const Hotel& hotel) override;
+    bool deletarHotel(const Codigo& codigo) override;
+    bool atualizarHotel(const Hotel& hotel) override;
+    Hotel lerHotel(const Codigo& codigo) override;
+    list<Hotel> listarHoteis() override;
 
-    // Método de Execução (implementa IUIReserva)
-    void executar() override;
+    bool criarQuarto(const Quarto& quarto) override;
+    bool deletarQuarto(const Numero& numero) override;
+    bool atualizarQuarto(const Quarto& quarto) override;
+    Quarto lerQuarto(const Numero& numero) override;
+    list<Quarto> listarQuartos() override;
 
-    // Funções auxiliares específicas para cada serviço CRUD (para organizar o menu)
-    void executarCriarReserva();
-    void executarDeletarReserva();
-    void executarAtualizarReserva();
-    void executarPesquisarReserva();
-    void executarListarReservas();
-
-    // Função auxiliar para coletar e validar dados de Reserva
-    bool coletarDadosReserva(Reserva* reserva);
+    // Métodos de Injeção de Dependência
+    void setContainerHotel(ContainerHotel* container) { this->containerHoteis = container; }
+    void setContainerQuarto(ContainerQuarto* container) { this->containerQuartos = container; }
 };
 
-#endif // APRESENTACAO_HPP_INCLUDED
+#endif // SERVICOS_HPP_INCLUDED
