@@ -2,19 +2,20 @@
 #include <stdexcept>
 #include <string>
 #include <cctype>
-#include <algorithm>
 #include <iostream>
-#include <sstream> // Necessário para conversão de Ramal
+#include <vector>
+#include <algorithm>
+#include <cmath> // Para round
 
 using namespace std;
 
-// ====================================================================
-// NOSSAS CLASSES INICIAIS (NUMERO, SENHA, ENDERECO)
-// ====================================================================
+// ============================================================================
+// CLASSE NUMERO
+// ============================================================================
 
 void Numero::validar(int valor) {
     if(valor < 1 || valor > 999) {
-        throw invalid_argument("Numero invalido. O valor deve estar entre 001 e 999.");
+        throw invalid_argument("Numero invalido. O valor deve estar entre 1 e 999.");
     }
 }
 
@@ -23,47 +24,38 @@ void Numero::setValor(int novoValor) {
     this->valor = novoValor;
 }
 
-void Senha::validar(const string& valor) { // CORREÇÃO: const string&
+// ============================================================================
+// CLASSE SENHA
+// ============================================================================
+
+void Senha::validar(const string& valor) {
     const int TAMANHO = 5;
 
     if(valor.length() != TAMANHO) {
-        throw invalid_argument("Senha deve conter 5 caracteres.");
+        throw invalid_argument("Senha deve conter exatamente 5 caracteres.");
     }
 
-    int temDigito = 0;
-    int temMaiuscula = 0;
-    int temMinuscula = 0;
-    int temEspecial = 0;
+    bool temDigito = false;
+    bool temMaiuscula = false;
+    bool temMinuscula = false;
+    bool temEspecial = false;
 
     const string CARACTERES_ESPECIAIS = "!\"#$%&?";
 
-    // 1. Verifica Composição Mínima e Caracteres Permitidos
-    for(int i = 0; i < TAMANHO; i++) {
-        char c = valor[i];
-
-        if (isdigit(c)) {
-            temDigito = 1;
-        }
-        else if (isupper(c)) {
-            temMaiuscula = 1;
-        }
-        else if (islower(c)) {
-            temMinuscula = 1;
-        }
-        else if (CARACTERES_ESPECIAIS.find(c) != string::npos) {
-            temEspecial = 1;
-        }
-        else {
-            throw invalid_argument("Caracter invalido. Use letra (a-z, A-Z), digito (0-9) ou especial (!\"#$%&?).");
-        }
+    for(char c : valor) {
+        if (isdigit(c)) temDigito = true;
+        else if (isupper(c)) temMaiuscula = true;
+        else if (islower(c)) temMinuscula = true;
+        else if (CARACTERES_ESPECIAIS.find(c) != string::npos) temEspecial = true;
+        else throw invalid_argument("Caracter invalido na senha.");
     }
 
-    if(temDigito == 0 || temMaiuscula == 0 || temMinuscula == 0 || temEspecial == 0) {
+    if(!temDigito || !temMaiuscula || !temMinuscula || !temEspecial) {
         throw invalid_argument("Senha deve conter pelo menos uma letra minuscula, uma maiuscula, um digito e um caracter especial.");
     }
 
-    // 2. Verifica Sequência
-    for(int i = 0; i < TAMANHO - 1; i++) {
+    // Verifica caracteres sequenciais repetidos (tipo por tipo)
+    for(size_t i = 0; i < valor.length() - 1; i++) {
         char atual = valor[i];
         char proximo = valor[i+1];
 
@@ -76,41 +68,45 @@ void Senha::validar(const string& valor) { // CORREÇÃO: const string&
     }
 }
 
-void Senha::setValor(const string& novoValor) { // CORREÇÃO: const string&
+void Senha::setValor(const string& novoValor) {
     validar(novoValor);
     this->valor = novoValor;
 }
 
-void Endereco::validar(const string& valor) { // CORREÇÃO: const string&
-    const int TAMANHO_MIN = 5;
-    const int TAMANHO_MAX = 30;
+// ============================================================================
+// CLASSE ENDERECO
+// ============================================================================
+
+void Endereco::validar(const string& valor) {
+    const size_t TAMANHO_MIN = 5;
+    const size_t TAMANHO_MAX = 30;
     const string CARACTERES_ESPECIAIS = ",. ";
 
     if(valor.length() < TAMANHO_MIN || valor.length() > TAMANHO_MAX) {
-        throw invalid_argument("Endereço deve conter entre 5 e 30 caracteres.");
+        throw invalid_argument("Endereco deve conter entre 5 e 30 caracteres.");
     }
 
-    for(int i = 0; i < valor.length(); i++) {
+    for(size_t i = 0; i < valor.length(); i++) {
         char c = valor[i];
 
         if (!(isalnum(c) || CARACTERES_ESPECIAIS.find(c) != string::npos)) {
-            throw invalid_argument("Caracter invalido. Use letra (a-z, A-Z), digito (0-9) ou especial (., ).");
+            throw invalid_argument("Caracter invalido no endereco.");
         }
 
         if((i == 0 || i == valor.length()-1) && CARACTERES_ESPECIAIS.find(c) != string::npos) {
-            throw invalid_argument("Primeiro e último caracter não pode ser vírgula, ponto ou espaço em branco.");
+            throw invalid_argument("Primeiro e ultimo caracter nao pode ser virgula, ponto ou espaco em branco.");
         }
     }
 
-    for(int i = 0; i < valor.length() - 1; i++) {
+    for(size_t i = 0; i < valor.length() - 1; i++) {
         char atual = valor[i];
         char proximo = valor[i+1];
 
         if(atual == ',' && (proximo == ',' || proximo == '.')) {
-            throw invalid_argument("Vírgula não pode ser seguida por vírgula ou ponto.");
+            throw invalid_argument("Virgula nao pode ser seguida por virgula ou ponto.");
         }
         if(atual == '.' && (proximo == ',' || proximo == '.')) {
-            throw invalid_argument("Ponto não pode ser seguido por vírgula ou ponto.");
+            throw invalid_argument("Ponto nao pode ser seguido por virgula ou ponto.");
         }
         if(atual == ' ' && !isalnum(proximo)) {
             throw invalid_argument("Espaco em branco deve ser seguido por letra ou digito.");
@@ -118,210 +114,327 @@ void Endereco::validar(const string& valor) { // CORREÇÃO: const string&
     }
 }
 
-void Endereco::setValor(const string& novoValor) { // CORREÇÃO: const string&
+void Endereco::setValor(const string& novoValor) {
     validar(novoValor);
     this->valor = novoValor;
 }
 
-// ====================================================================
-// ----------------- Marcel (DINHEIRO, CARTAO, NOME) -----------------------
-// ====================================================================
+// ============================================================================
+// CLASSE DINHEIRO
+// ============================================================================
 
-void Dinheiro::validar(const string& valor) { // CORREÇÃO: const string&
-    size_t posVirgula = valor.find(',');
-
-    if (posVirgula == string::npos) {
-        throw invalid_argument("Formato invalido. Deve conter virgula separando centavos.\n");
+void Dinheiro::validar(long long valor) {
+    if (valor < 1 || valor > 100000000) { // 1 centavo a 1 milhão de reais (em centavos)
+       throw invalid_argument("Valor monetario fora do intervalo permitido (0,01 a 1.000.000,00).");
     }
-    // ... [Restante da lógica Dinheiro::validar está OK] ...
+}
 
-    // Recalcular o valor numérico apenas com dígitos para checar o limite
-    string strValorNumerico;
-    for (char c : valor) {
-        if (isdigit(c)) {
-            strValorNumerico += c;
+void Dinheiro::setValor(double valor) {
+    // Converte para centavos com arredondamento para evitar problemas de precisão
+    long long valorEmCentavos = static_cast<long long>(std::round(valor * 100));
+    validar(valorEmCentavos);
+    this->valor = valorEmCentavos;
+}
+
+double Dinheiro::getValor() const {
+    return static_cast<double>(valor) / 100.0;
+}
+
+// ============================================================================
+// CLASSE CARTAO
+// ============================================================================
+
+void Cartao::validar(const string& valor){
+    if(valor.size() != 16)
+        throw invalid_argument("O numero do cartao deve conter exatamente 16 digitos.");
+
+    for(char c : valor){
+        if(!isdigit(c))
+            throw invalid_argument("O cartao deve conter apenas digitos (0-9).");
+    }
+
+    // Algoritmo de Luhn
+    int soma = 0;
+    for(int i = 14; i >= 0; i--){
+        int digito = valor[i] - '0';
+
+        // O algoritmo dobra alternadamente, começando do penúltimo (índice par se considerarmos 0-based da direita, ou ímpar da esquerda se tamanho par)
+        // Como size é 16 (par), índices pares (0, 2... 14) são os que dobram.
+        if(i % 2 == 0) {
+            digito *= 2;
+            if(digito > 9) digito -= 9;
         }
+        soma += digito;
     }
 
-    long long valorLongo;
-    try {
-        valorLongo = stoll(strValorNumerico);
-    } catch (const out_of_range& e) {
-        throw invalid_argument("Valor excede o limite maximo.\n");
-    }
+    int digitoVerificadorCalculado = (10 - (soma % 10)) % 10;
+    int digitoVerificadorReal = valor[15] - '0';
 
-    if (valorLongo < 1 || valorLongo > 100000000) {
-        throw invalid_argument("Valor fora do intervalo permitido (0,01 a 1.000.000,00).\n");
-    }
+    if(digitoVerificadorCalculado != digitoVerificadorReal)
+        throw invalid_argument("Numero do cartao invalido (falha no algoritmo de Luhn).");
 }
 
-void Dinheiro::setValor(const string& novoValor) { // CORREÇÃO: setValor e const string&
-    validar(novoValor);
-
-    // CRÍTICO: Recalcular o valor apenas com dígitos para armazenar em 'int' (centavos)
-    string strCentavos;
-    for (char c : novoValor) {
-        if (isdigit(c)) {
-            strCentavos += c;
-        }
-    }
-    this->valor = stoi(strCentavos);
-}
-
-string Dinheiro::getValor() const {
-    // Mantido o código de formatação para retornar a string formatada
-    string s = to_string(this->valor);
-    // ... [código de formatação omitido por brevidade] ...
-    return "R$ " + s; // Retorno fictício, assumindo que a formatação é complexa e externa.
-}
-
-void Cartao::validar(const string& valor){ // CORREÇÃO: const string&
-    if(valor.size()!=16)
-        throw invalid_argument("O numero do cartao deve conter exatamente 16 digitos (0-9)\n");
-    else{
-        // ... [Lógica de Cartao::validar está OK] ...
-    }
-}
-
-void Cartao::setValor(const string& valor){ // CORREÇÃO: setValor e const string&
+void Cartao::setValor(const string& valor){
     validar(valor);
     this->valor = valor;
 }
 
-void Nome::validar(const string& valor){ // CORREÇÃO: const string&
-    if(5>valor.size() || valor.size()>20)
-        throw invalid_argument("Nome deve conter entre 5 e 20 caracteres.\n");
-    // ... [Lógica de Nome::validar está OK, usa comparações ASCII] ...
+// ============================================================================
+// CLASSE NOME
+// ============================================================================
+
+void Nome::validar(const string& valor){
+    if(valor.size() < 5 || valor.size() > 20)
+        throw invalid_argument("Nome deve conter entre 5 e 20 caracteres.");
+
+    // O HPP define que precisamos de validações, vamos garantir algumas básicas
+    // Mas respeitando o código original da equipe que estava bom:
+
+    if(valor.back() == ' ')
+        throw invalid_argument("Ultimo caractere nao deve ser espaco em branco.");
+
+    // Verifica caractere inicial
+    if(!isupper(valor[0]))
+        throw invalid_argument("Primeiro caractere deve ser letra maiuscula.");
+
+    bool espacoAnterior = false;
+    for(size_t i = 0; i < valor.size(); i++){
+        char c = valor[i];
+
+        if (c == ' ') {
+            if (espacoAnterior) throw invalid_argument("Nao pode haver espacos seguidos.");
+            espacoAnterior = true;
+            continue;
+        }
+
+        if (espacoAnterior) {
+            if (!isupper(c)) throw invalid_argument("Primeiro caractere de cada termo deve ser maiusculo.");
+            espacoAnterior = false;
+        } else {
+            if (!isalpha(c) && c != ' ') throw invalid_argument("Nome deve conter apenas letras e espacos.");
+        }
+    }
 }
 
-void Nome::setValor(const string& valor){ // CORREÇÃO: setValor e const string&
+void Nome::setValor(const string& valor){
     validar(valor);
-    this->valor=valor;
+    this->valor = valor;
 }
 
-// ====================================================================
-// -------------------- Duda (CAPACIDADE, DATA, TELEFONE) ----------------------
-// ====================================================================
+// ============================================================================
+// CLASSE CAPACIDADE
+// ============================================================================
 
 void Capacidade::validar(unsigned short capacidade) const {
-    if (capacidade < LIMITE_INFERIOR)
-        throw out_of_range("Erro: capacidade menor que o limite mínimo permitido de 1 pessoa");
-
-    if (capacidade > LIMITE_SUPERIOR)
-        throw out_of_range("Erro: capacidade maior que o limite máximo permitido de 4 pessoas");
+    if (capacidade < 1 || capacidade > 4)
+        throw invalid_argument("Capacidade deve ser 1, 2, 3 ou 4.");
 }
 
-void Capacidade::setValor(unsigned short capacidade) { // CORREÇÃO: setValor
+void Capacidade::setValor(unsigned short capacidade) {
     validar(capacidade);
     this->capacidade = capacidade;
 }
 
-// ... [Métodos auxiliares de Data estão OK] ...
+// ============================================================================
+// CLASSE DATA
+// ============================================================================
 
-void Data::validar(unsigned short dia, const string &mes, unsigned short ano) const {
-    // ... [Lógica de Data::validar está OK] ...
+string Data::letraMaiuscula(const string &s) const {
+    string convertida = s;
+    for (char &c : convertida) {
+        c = toupper(c);
+    }
+    return convertida;
 }
 
-void Data::setValor(unsigned short dia, const string &mes, unsigned short ano) { // CORREÇÃO: setValor
+unsigned short Data::mesParaIndice(const string &mes) const {
+    string m = letraMaiuscula(mes);
+    if (m == "JAN") return 1;
+    if (m == "FEV") return 2;
+    if (m == "MAR") return 3;
+    if (m == "ABR") return 4;
+    if (m == "MAI") return 5;
+    if (m == "JUN") return 6;
+    if (m == "JUL") return 7;
+    if (m == "AGO") return 8;
+    if (m == "SET") return 9;
+    if (m == "OUT") return 10;
+    if (m == "NOV") return 11;
+    if (m == "DEZ") return 12;
+    return 0;
+}
+
+bool Data::ehBissexto(unsigned short ano) const {
+    return (ano % 4 == 0 && (ano % 100 != 0 || ano % 400 == 0));
+}
+
+unsigned short Data::diasNoMes(const string &mes, unsigned short ano) const {
+    unsigned short indice = mesParaIndice(mes);
+    switch (indice) {
+        case 1: case 3: case 5: case 7: case 8: case 10: case 12: return 31;
+        case 4: case 6: case 9: case 11: return 30;
+        case 2: return ehBissexto(ano) ? 29 : 28;
+        default: return 0;
+    }
+}
+
+bool Data::mesValido(const string &mes) const {
+    return mesParaIndice(mes) != 0;
+}
+
+void Data::validar(unsigned short dia, const string &mes, unsigned short ano) const {
+    if (ano < ANO_MIN || ano > ANO_MAX)
+        throw invalid_argument("Ano fora do intervalo permitido (2000-2999).");
+
+    if (!mesValido(mes))
+        throw invalid_argument("Mes invalido. Use JAN, FEV, MAR, etc.");
+
+    unsigned short limite = diasNoMes(mes, ano);
+    if (dia < 1 || dia > limite)
+        throw invalid_argument("Dia invalido para o mes e ano informados.");
+}
+
+void Data::setValor(unsigned short dia, const string &mes, unsigned short ano) {
     validar(dia, mes, ano);
     this->dia = dia;
     this->mes = letraMaiuscula(mes);
     this->ano = ano;
 }
 
-bool Telefone::validar(const string &telefone) {
-    if (telefone.empty() || telefone[0] != '+')
-        throw invalid_argument("Erro: telefone deve começar com '+'.");
+// ============================================================================
+// CLASSE TELEFONE
+// ============================================================================
 
+void Telefone::validar(const string &telefone) {
+    if (telefone.empty() || telefone[0] != '+')
+        throw invalid_argument("Telefone deve comecar com '+'.");
+
+    // +DDDDDDDDDDDDDD (15 chars: + e 14 dígitos) ou 16 chars se for + e 15 dígitos?
+    // O documento diz "+DDDDDDDDDDDDDD" com D sendo digito.
+    // Se contar os D's no exemplo visual do PDF, as vezes parece ter 14 ou 15.
+    // Mas a tabela diz "Telefone: +DDDDDDDDDDDDDD".
+    // Vamos assumir a validação do código original da equipe que pedia 16 chars totais.
+
+    // Assumindo + e 15 digitos = 16 chars.
     if (telefone.size() != 16)
-        throw invalid_argument("Erro: telefone deve ter exatamente 16 caracteres.");
+        throw invalid_argument("Telefone deve ter formato + e 15 digitos (Total 16 chars).");
 
     for (size_t i = 1; i < telefone.size(); i++) {
         if (!isdigit(telefone[i]))
-            throw invalid_argument("Erro: telefone deve conter apenas dígitos depois do '+'.");
+            throw invalid_argument("Telefone deve conter apenas digitos apos o '+'.");
     }
-    return true; // Retorna true (assinatura pede bool)
 }
 
-void Telefone::setValor(const string &telefone) { // CORREÇÃO: setValor
-    validar(telefone);
-    this->telefone = telefone;
+void Telefone::setValor(const string &novoValor) {
+    validar(novoValor);
+    this->telefone = novoValor;
 }
 
-// ====================================================================
-// ------------------ Gustavo (CODIGO, EMAIL, RAMAL) ----------------------
-// ====================================================================
+// ============================================================================
+// CLASSE CODIGO
+// ============================================================================
 
-void Codigo::validar(const std::string& codigo) { // CORREÇÃO: const std::string&
-
+void Codigo::validar(const string& codigo) {
     if(codigo.length() != 10) {
-        throw std::invalid_argument("Tamanho inválido (deve ser 10).");
+        throw invalid_argument("Codigo deve ter 10 caracteres.");
     }
 
-    for(char x : codigo) {
-        // CORREÇÃO: Usar isalnum (ou checar a-z, A-Z, 0-9)
-        if(!isalnum(x)) {
-            throw std::invalid_argument("O código deve ter apenas letras (a-z, A-Z) e números (0-9).");
+    for(char c : codigo) {
+        if(!isalnum(c)) {
+            throw invalid_argument("Codigo deve conter apenas letras e numeros.");
         }
     }
 }
 
-void Codigo::setValor(const std::string& codigo) { // CORREÇÃO: setValor e const string&
-    validar(codigo);
-    this->codigo = codigo;
+void Codigo::setValor(const string& novoValor) {
+    validar(novoValor);
+    this->codigo = novoValor;
 }
 
-// Construtor Codigo::Codigo(std::string& codigo) foi removido.
+// ============================================================================
+// CLASSE EMAIL
+// ============================================================================
 
-void EMAIL::validar(const std::string& email) { // CORREÇÃO: const std::string&
-
-    //... [Lógica do EMAIL - Grande, será corrigida para usar const] ...
-
-    // CRÍTICO: O código original manipula a string 'email' e a usa para atribuir 'this->email'.
-    // Mas agora 'email' é const! Você precisa criar uma cópia interna para manipulação.
-
-    string emailCopia = email; // Criamos uma cópia para manipulação
-
-    //dividir pra verificar parte local e dominio
-    size_t arroba = emailCopia.find("@"); // Usa a cópia
-
-    if(arroba == std::string::npos) {
-        throw std::invalid_argument("Email deve ter @");
+void EMAIL::validar(const string& email) {
+    // Verifica estrutura básica
+    size_t posArroba = email.find("@");
+    if(posArroba == string::npos) {
+        throw invalid_argument("Email deve conter '@'.");
     }
 
-    // ... [Resto da lógica EMAIL::validar está OK, mas deve usar 'emailCopia' e 'std::tolower'] ...
+    string parte_local = email.substr(0, posArroba);
+    string dominio = email.substr(posArroba + 1);
 
-    // O final da validação deve salvar o valor padronizado na variável interna da classe,
-    // mas o método 'validar' não faz isso.
+    if(parte_local.length() > MAX_PARTE_LOCAL) throw invalid_argument("Parte local muito longa.");
+    if(dominio.length() > MAX_DOMINIO) throw invalid_argument("Dominio muito longo.");
+
+    // Validação Parte Local
+    // Pode conter letra, digito, ponto ou hifen. Não pode iniciar/terminar com ponto/hifen.
+    if(parte_local.empty()) throw invalid_argument("Parte local vazia.");
+
+    if(parte_local.front() == '.' || parte_local.front() == '-')
+        throw invalid_argument("Parte local nao pode iniciar com ponto ou hifen.");
+    if(parte_local.back() == '.' || parte_local.back() == '-')
+        throw invalid_argument("Parte local nao pode terminar com ponto ou hifen.");
+
+    bool anteriorPontoOuHifen = false;
+    for(char c : parte_local) {
+        if (c == '.' || c == '-') {
+            if(anteriorPontoOuHifen) throw invalid_argument("Ponto ou hifen nao podem ser consecutivos.");
+            anteriorPontoOuHifen = true;
+        } else if (isalnum(c)) {
+            anteriorPontoOuHifen = false;
+        } else {
+            throw invalid_argument("Caractere invalido na parte local do email.");
+        }
+    }
+
+    // Validação Domínio
+    // Partes separadas por ponto. Não hifen inicio/fim.
+    if(dominio.empty()) throw invalid_argument("Dominio vazio.");
+
+    if(dominio.front() == '-') throw invalid_argument("Dominio nao pode iniciar com hifen.");
+    if(dominio.back() == '-') throw invalid_argument("Dominio nao pode terminar com hifen.");
+
+    // O domínio deve ter pelo menos um ponto separando partes? O PDF diz "composto por uma ou mais partes separadas por ponto".
+    // Se for só "com", é uma parte. Se for "com.br", duas.
+    // Mas não pode iniciar ou terminar com ponto.
+
+    if(dominio.front() == '.' || dominio.back() == '.')
+        throw invalid_argument("Dominio nao pode iniciar ou terminar com ponto.");
+
+    anteriorPontoOuHifen = false;
+    for(char c : dominio) {
+        if (c == '.') {
+            if(anteriorPontoOuHifen) throw invalid_argument("Pontos nao podem ser consecutivos no dominio.");
+            anteriorPontoOuHifen = true;
+        } else if (c == '-') {
+             // Hifen no meio é ok, mas hifen seguido de ponto? "a-.b"?
+             // PDF: "não pode iniciar ou terminar com hifen".
+        } else if (!isalnum(c)) {
+             throw invalid_argument("Caractere invalido no dominio.");
+        }
+
+        if (c != '.') anteriorPontoOuHifen = false;
+    }
 }
 
-void EMAIL::setValor(const std::string& email) { // CORREÇÃO: setValor e const string&
-    // A validação do EMAIL é complexa e precisa de manipulação da string.
-    // O setValor precisa chamar a validação E o ajuste da string.
-
-    string emailAjustado = email;
-    validar(emailAjustado); // Aqui validar deve aceitar uma string não-const para ajustes
-                            // OU a lógica de ajuste deve ir para cá.
-
-    // Opção mais simples: Validar com const e a lógica de ajuste deve ir para o setValor.
-    // Reverter para o modelo anterior onde o validar é const e o setValor faz a manipulação.
-
-    string emailCopia = email;
-    // ... [Repetir a lógica de manipulação e ajuste de minúsculas no emailCopia aqui] ...
-
-    validar(emailCopia); // A validação já checa o formato.
-    this->email = emailCopia; // Se validou, atribui.
+void EMAIL::setValor(const string& novoValor) {
+    validar(novoValor);
+    this->email = novoValor;
 }
 
-// Construtor EMAIL::EMAIL(std::string& email) foi removido.
+// ============================================================================
+// CLASSE RAMAL
+// ============================================================================
 
-void Ramal::validar(unsigned short ramal) { // CORREÇÃO: unsigned short
-    if(ramal > 50) throw std::invalid_argument("Ramal deve estar entre 00 e 50");
+void Ramal::validar(unsigned short ramal) {
+    if(ramal > 50) { // Como é unsigned, < 0 não precisa checar
+        throw invalid_argument("Ramal deve estar entre 0 e 50.");
+    }
 }
 
-void Ramal::setValor(unsigned short ramal) { // CORREÇÃO: setValor e unsigned short
-    validar(ramal);
-    this->ramal = ramal;
+void Ramal::setValor(unsigned short novoValor) {
+    validar(novoValor);
+    this->ramal = novoValor;
 }
-
-// Construtor Ramal::Ramal(int& ramal) foi removido.
