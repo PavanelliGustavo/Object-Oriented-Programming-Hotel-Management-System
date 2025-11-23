@@ -6,6 +6,55 @@
 
 using namespace std;
 
+// ====================================================================
+// CONTROLADORA DE APRESENTAÇÃO: AUTENTICAÇÃO (MAA)
+// ====================================================================
+
+bool CntrIUAutenticacao::executar() {
+    string emailStr, senhaStr;
+    bool autenticacaoSucesso = false;
+
+    // Loop para tentar login
+    while (true) {
+        cout << "\n--- AUTENTICACAO DO GERENTE ---\n";
+        cout << "Digite seu EMAIL (PK): ";
+        cin >> emailStr;
+        cout << "Digite sua SENHA: ";
+        cin >> senhaStr;
+        
+        try {
+            // 1. Validação de formato (Domínio)
+            EMAIL domEmail;
+            domEmail.setValor(emailStr);
+
+            Senha domSenha;
+            domSenha.setValor(senhaStr);
+            
+            // 2. Delega a verificação para a Camada de Serviço
+            if (servicoAutenticacao->autenticar(domEmail, domSenha)) {
+                cout << "\nSUCESSO: Gerente autenticado!" << endl;
+                
+                // 3. Informa o Menu Principal (MAI) que o login foi feito
+                controladorIntegracao->setAutenticado(true);
+                autenticacaoSucesso = true;
+                break;
+            } else {
+                cout << "\nFALHA: Email ou Senha invalidos. Tente novamente." << endl;
+            }
+
+        } catch (const invalid_argument& e) {
+            // Captura a exceção lançada pelo Domínio (e.g., Email ou Senha mal formatados)
+            cout << "\nERRO DE FORMATO: " << e.what() << endl;
+        }
+        
+        cout << "Pressione Enter para continuar...";
+        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpa buffer
+        cin.get();
+    }
+    
+    return autenticacaoSucesso;
+}
+
 // Funções Auxiliares para Limpar Entrada
 void limparBuffer() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
