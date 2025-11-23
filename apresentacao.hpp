@@ -1,147 +1,125 @@
 #ifndef APRESENTACAO_HPP_INCLUDED
 #define APRESENTACAO_HPP_INCLUDED
 
-#include "interfaces.hpp"
+#include "interfaces.hpp" // Contém IAAutenticacao, IAPessoal, IAReserva
 #include "dominios.hpp"
 #include <iostream>
 
 using namespace std;
 
-// Forward Declaration do Menu Principal (para ser usado após autenticação)
-class CntrIUIntegracao;
-
 // ====================================================================
-// INTERFACE DE APRESENTAÇÃO (GERAL)
+// 1. CONTROLADORA DE APRESENTAÇÃO: AUTENTICAÇÃO (MAA)
 // ====================================================================
 
 /**
- * @class IUIAutenticacao
- * @brief Interface para o Módulo de Apresentação de Autenticação (MAA).
- *
- * @details Define o contrato para a interação com o usuário na tela de login.
+ * @class CntrMAAutenticacao
+ * @brief Implementa a interface IAAutenticacao (definida em interfaces.hpp).
+ * @details Responsável por interagir com o usuário para Login e Cadastro.
  */
-class IUIAutenticacao {
-public:
-    virtual void setInterfaceServico(ILNAutenticacao* interface) = 0;
-    virtual void setControladorIntegracao(CntrIUIntegracao* controlador) = 0;
-    virtual bool executar() = 0; // Retorna true se a autenticação for bem-sucedida
-    virtual ~IUIAutenticacao() {}
-};
-
-
-// ====================================================================
-// CONTROLADORA DE APRESENTAÇÃO: AUTENTICAÇÃO (MAA)
-// ====================================================================
-
-/**
- * @class CntrIUAutenticacao
- * @brief Implementa a lógica da tela de login.
- *
- * @details Coleta EMAIL e Senha do usuário e delega a verificação à Camada de Serviço.
- */
-class CntrIUAutenticacao : public IUIAutenticacao {
+class CntrMAAutenticacao : public IAAutenticacao {
 private:
-    ILNAutenticacao* servicoAutenticacao; // Referência à Camada de Serviço
-    CntrIUIntegracao* controladorIntegracao; // Referência ao Menu Principal
+    ISAutenticacao* servicoAutenticacao;
 
 public:
-    // Métodos de Injeção de Dependência
-    void setInterfaceServico(ILNAutenticacao* interface) override {
-        this->servicoAutenticacao = interface;
-    }
-    void setControladorIntegracao(CntrIUIntegracao* controlador) override {
-        this->controladorIntegracao = controlador;
+    // Implementação do método de injeção de dependência
+    void setISAutenticacao(ISAutenticacao* servico) override {
+        this->servicoAutenticacao = servico;
     }
 
-    // Método principal de execução
-    bool executar() override;
+    // Implementação do fluxo principal
+    // Retorna true se autenticou, e preenche o objeto 'email' com o logado
+    bool executar(EMAIL& email) override;
 };
 
 
 // ====================================================================
-// CONTROLADORA DE APRESENTAÇÃO: INTEGRAÇÃO (MAI) - PASSO 6
+// 2. CONTROLADORA DE APRESENTAÇÃO: PESSOAL (MAP)
 // ====================================================================
 
 /**
- * @class CntrIUIntegracao
- * @brief Controladora de Integração e Menu Principal do Sistema (MAI).
- *
- * @details Gerencia a navegação de alto nível após o login e o encerramento do sistema.
+ * @class CntrMAPessoal
+ * @brief Implementa a interface IAPessoal.
+ * @details Responsável por mostrar dados do gerente e permitir edição/exclusão.
  */
-class CntrIUIntegracao {
+class CntrMAPessoal : public IAPessoal {
 private:
-    // Referências para as Controladoras de Apresentação de cada subsistema
-    // (A ser injetada no main.cpp)
-    IUIReserva* ctrlReserva;
-    // IUIPessoa* ctrlPessoa;
-
-    bool autenticado; // Flag para saber se o usuário está logado
+    ISPessoa* servicoPessoa;
 
 public:
-    CntrIUIntegracao() : autenticado(false) {}
-
-    void setCtrlReserva(IUIReserva* ctrl) { this->ctrlReserva = ctrl; }
-
-    void executar() {
-        // Lógica do menu principal (será implementada no .cpp)
+    void setISPessoa(ISPessoa* servico) override {
+        this->servicoPessoa = servico;
     }
 
-    void setAutenticado(bool status) {
-        this->autenticado = status;
-    }
+    void executar(const EMAIL& email) override;
+
+    // Métodos auxiliares internos
+    void editarPerfil(const EMAIL& email);
 };
 
+
 // ====================================================================
-// INTERFACE DE APRESENTAÇÃO (GERAL)
+// 3. CONTROLADORA DE APRESENTAÇÃO: RESERVAS (MAR)
 // ====================================================================
 
 /**
- * @class IUIReserva
- * @brief Interface para o Módulo de Apresentação de Reservas (MAR).
- *
- * @details Define o contrato para a interação com o usuário, exigindo uma referência
- * à interface de Serviço de Reservas para acessar a lógica de negócio.
+ * @class CntrMAReserva
+ * @brief Implementa a interface IAReserva.
+ * @details Gerencia Hotéis, Quartos e Reservas.
  */
-class IUIReserva {
-public:
-    virtual void setInterfaceServico(ILNReserva* interface) = 0;
-    virtual void executar() = 0; // Método principal que exibe o menu/inicia a interação
-    virtual ~IUIReserva() {}
-};
-
-// ====================================================================
-// CONTROLADORA DE APRESENTAÇÃO (MAR)
-// ====================================================================
-
-/**
- * @class CntrIUReserva
- * @brief Implementação da controladora de Interface com o Usuário para Reservas.
- *
- * @details É responsável por coletar dados do usuário, validar o formato inicial (usando Domínios)
- * e delegar as ações à Camada de Serviço através da interface ILNReserva.
- */
-class CntrIUReserva : public IUIReserva {
+class CntrMAReserva : public IAReserva {
 private:
-    ILNReserva* servicoReservas; // Referência à interface de SERVIÇO (MSR)
+    ISReserva* servicoReserva;
+    ISPessoa* servicoPessoa; // Necessário para listar hóspedes ao criar reservas
 
 public:
-    // Método de Injeção de Dependência (implementa IUIReserva)
-    void setInterfaceServico(ILNReserva* interface) override {
-        this->servicoReservas = interface;
+    void setISReserva(ISReserva* servico) override {
+        this->servicoReserva = servico;
     }
 
-    // Método de Execução (implementa IUIReserva)
-    void executar() override;
+    void setISPessoa(ISPessoa* servico) override {
+        this->servicoPessoa = servico;
+    }
 
-    // Funções auxiliares específicas para cada serviço CRUD (para organizar o menu)
-    void executarCriarReserva();
-    void executarDeletarReserva();
-    void executarAtualizarReserva();
-    void executarPesquisarReserva();
-    void executarListarReservas();
+    void executar(const EMAIL& email) override;
 
-    // Função auxiliar para coletar e validar dados de Reserva
-    bool coletarDadosReserva(Reserva* reserva);
+    // Métodos auxiliares para organizar o menu interno
+    void menuHoteis();
+    void menuQuartos();
+    void menuReservas();
+    void menuHospedes();
+};
+
+
+// ====================================================================
+// 4. CONTROLADORA DE INTEGRAÇÃO (MAI)
+// ====================================================================
+
+/**
+ * @class CntrMAIntegracao
+ * @brief Módulo de Acesso e Interface (Hub Principal).
+ * @details Não herda de interface específica, pois é o ponto de entrada (main).
+ */
+class CntrMAIntegracao {
+private:
+    // Referências para as interfaces dos módulos de apresentação
+    IAAutenticacao* cntrAutenticacao;
+    IAPessoal* cntrPessoal;
+    IAReserva* cntrReserva;
+
+    // Estado do usuário logado
+    EMAIL emailUsuarioLogado;
+    bool autenticado;
+
+public:
+    CntrMAIntegracao() : autenticado(false) {}
+
+    // Injeção das controladoras de apresentação
+    void setCntrAutenticacao(IAAutenticacao* cntr) { this->cntrAutenticacao = cntr; }
+    void setCntrPessoal(IAPessoal* cntr) { this->cntrPessoal = cntr; }
+    void setCntrReserva(IAReserva* cntr) { this->cntrReserva = cntr; }
+
+    // Loop principal do sistema
+    void executar();
 };
 
 #endif // APRESENTACAO_HPP_INCLUDED
