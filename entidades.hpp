@@ -2,9 +2,7 @@
 #define ENTIDADES_HPP_INCLUDED
 
 #include "dominios.hpp"
-#include <stdexcept>
 #include <string>
-#include <cctype>
 
 using namespace std;
 
@@ -17,9 +15,8 @@ using namespace std;
  * @brief Entidade base que representa uma Pessoa no sistema.
  *
  * @details Esta classe define os atributos comuns a Gerentes e Hóspedes.
- * A chave primária(PK) do resgistro é o EMAIL.
+ * A chave primária (PK) do registro é o EMAIL.
  */
-
 class Pessoa {
     private:
         Nome nome;
@@ -27,15 +24,13 @@ class Pessoa {
     public:
         /**
          * @brief Atribui o Nome da Pessoa.
-         * @param novoNome Objeto Domínio Nome, validado para conter entre 5 e 20
-         * caracteres e formatação correta.
+         * @param novoNome Objeto Domínio Nome.
          */
         void setNome(const Nome& novoNome);
 
         /**
          * @brief Atribui o EMAIL da Pessoa.
-         * @param novoEmail Objeto Domínio EMAIL, validado seguindo o padrão
-         * parte-local@domínio.
+         * @param novoEmail Objeto Domínio EMAIL.
          */
         void setEmail(const EMAIL& novoEmail);
 
@@ -81,15 +76,13 @@ class Gerente : public Pessoa {
     public:
         /**
          * @brief Atribui o Ramal de contato do Gerente.
-         * @param novoRamal Objeto Domínio Ramal, validado para conter
-         * um valor entre 00 e 50.
+         * @param novoRamal Objeto Domínio Ramal.
          */
         void setRamal(const Ramal& novoRamal);
 
         /**
          * @brief Atribui a Senha de acesso do Gerente.
-         * @param novaSenha Objeto Domínio Senha, validado para conter 5 caracteres
-         * com composição mista e sem repetição sequencial.
+         * @param novaSenha Objeto Domínio Senha.
          */
         void setSenha(const Senha& novaSenha);
 
@@ -129,22 +122,20 @@ inline Senha Gerente::getSenha() const{
  * @details Herda de Pessoa e adiciona atributos necessários para o registro e
  * pagamento: Endereço e Cartão.
  */
-class Hospede : public Pessoa { // CORREÇÃO: Nome da classe em maiúsculas (Hospede, não Hóspede)
+class Hospede : public Pessoa {
     private:
         Endereco endereco;
         Cartao cartao;
     public:
         /**
          * @brief Atribui o Endereço do Hóspede.
-         * @param novoEndereco Objeto Domínio Endereco, validado para conter entre
-         * 5 e 30 caracteres com regras de sequẽncia específicas.
+         * @param novoEndereco Objeto Domínio Endereco.
          */
         void setEndereco(const Endereco& novoEndereco);
 
         /**
          * @brief Atribui o Cartão do Hóspede.
-         * @param novoCartao Objeto Domínio Cartao, validado para conter 16
-         * dígitos e seguir o Algoritmo de Luhn.
+         * @param novoCartao Objeto Domínio Cartao.
          */
         void setCartao(const Cartao& novoCartao);
 
@@ -183,10 +174,10 @@ inline Cartao Hospede::getCartao() const {
 
 /**
  * @class Hotel
- * @brief Entidade que representa um Hotel geenciado pelo sistema.
+ * @brief Entidade que representa um Hotel gerenciado pelo sistema.
  *
  * @details Contém os dados de identificação e localização do hotel.
- * A chave primária(PK) do resgistro é o Codigo.
+ * A chave primária (PK) do registro é o Codigo.
  */
 class Hotel {
     private:
@@ -209,40 +200,19 @@ class Hotel {
 
         /**
          * @brief Atribui o Telefone do Hotel.
-         * @param novoTelefone Objeto Domínio Telefone, validado no formato
-         * +DDDDDDDDDDDDDD.
+         * @param novoTelefone Objeto Domínio Telefone.
          */
         void setTelefone(const Telefone& novoTelefone);
 
         /**
-         * @brief Atribui o Código do Hotel.
-         * @param novoCodigo Objeto Domínio Codigo, validado para conter 10
-         * caracteres alfanuméricos.
+         * @brief Atribui o Código do Hotel (PK).
+         * @param novoCodigo Objeto Domínio Codigo.
          */
         void setCodigo(const Codigo& novoCodigo);
 
-        /**
-         * @brief Retorna o Nome do Hotel.
-         * @return O objeto Domínio Nome.
-         */
         Nome getNome() const;
-
-        /**
-         * @brief Retorna o Endereço do Hotel.
-         * @return O objeto Domínio Endereco.
-         */
         Endereco getEndereco() const;
-
-        /**
-         * @brief Retorna o Telefone do Hotel.
-         * @return O objeto Domínio Telefone.
-         */
         Telefone getTelefone() const;
-
-        /**
-         * @brief Retorna o Código (PK) do Hotel.
-         * @return O objeto Domínio Codigo.
-         */
         Codigo getCodigo() const;
 };
 
@@ -294,14 +264,13 @@ class Quarto {
     public:
         /**
          * @brief Atribui o Número do Quarto.
-         * @param novoNumero Objeto Domínio Numero, validado entre 001 e 999.
+         * @param novoNumero Objeto Domínio Numero.
          */
         void setNumero(const Numero& novoNumero);
 
         /**
          * @brief Atribui a Capacidade máxima de pessoas do Quarto.
-         * @param novaCapacidade Objeto Domínio Capacidade,
-         * validado para 1, 2, 3 ou 4.
+         * @param novaCapacidade Objeto Domínio Capacidade.
          */
         void setCapacidade(const Capacidade& novaCapacidade);
 
@@ -317,28 +286,9 @@ class Quarto {
          */
         void setRamal(const Ramal& novoRamal);
 
-        /**
-         * @brief Retorna o Número do Quarto.
-         * @return O objeto Domínio Numero.
-         */
         Numero getNumero() const;
-
-        /**
-         * @brief Retorna a Capacidade do Quarto.
-         * @return O objeto Domínio Capacidade.
-         */
         Capacidade getCapacidade() const;
-
-        /**
-         * @brief Retorna o valor da Diária do Quarto.
-         * @return O objeto Domínio Dinheiro.
-         */
         Dinheiro getDiaria() const;
-
-        /**
-         * @brief Retorna o Ramal do Quarto.
-         * @return O objeto Domínio Ramal.
-         */
         Ramal getRamal() const;
 };
 
@@ -389,52 +339,32 @@ class Reserva {
         Codigo codigo;
     public:
         /**
-         * @brief Atribui a Data de Chegada da Reserva.
-         * @param novaChegada Objeto Domínio Data, validada com dia-mês-ano correto,
-         * incluindo anos bissextos.
+         * @brief Atribui a Data de Chegada.
+         * @param novaChegada Objeto Domínio Data.
          */
         void setChegada(const Data& novaChegada);
 
         /**
-         * @brief Atribui a Data de Partida da Reserva.
+         * @brief Atribui a Data de Partida.
          * @param novaPartida Objeto Domínio Data.
          */
         void setPartida(const Data& novaPartida);
 
         /**
-         * @brief Atribui o Valor total da Reserva.
+         * @brief Atribui o Valor Total da Reserva.
          * @param novoValor Objeto Domínio Dinheiro.
          */
         void setValor(const Dinheiro& novoValor);
 
         /**
-         * @brief Atribui o Código da Reserva.
+         * @brief Atribui o Código da Reserva (PK).
          * @param novoCodigo Objeto Domínio Codigo.
          */
         void setCodigo(const Codigo& novoCodigo);
 
-        /**
-         * @brief Retorna a Data de Chegada da Reserva.
-         * @return O objeto Domínio Data.
-         */
         Data getChegada() const;
-
-        /**
-         * @brief Retorna a Data de Partida da Reserva.
-         * @return O objeto Domínio Data.
-         */
         Data getPartida() const;
-
-        /**
-         * @brief Retorna o Valor total da Reserva.
-         * @return O objeto Domínio Dinheiro.
-         */
         Dinheiro getValor() const;
-
-        /**
-         * @brief Retorna o Código da Reserva.
-         * @return O objeto Domínio Codigo.
-         */
         Codigo getCodigo() const;
 };
 
