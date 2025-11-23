@@ -1,19 +1,22 @@
 #include "testes.hpp"
 #include <iostream>
+#include <stdexcept>
+#include <string>
 
 using namespace std;
 
 // ====================================================================
-// 0. DEFINIÇÕES DE CONSTANTES (PARA OS TESTES FALTANTES)
+// 0. DEFINIÇÕES DE CONSTANTES GLOBAIS (APENAS VALORES DE SETUP)
+// As constantes de classes (VALOR_VALIDO_SENHA, etc.) são definidas AQUI.
 // ====================================================================
 
-// Domínio Senha (já definido no .hpp)
+// Domínio Senha
 const string TUSenha::VALOR_VALIDO_SENHA = "A1!b#";
-const string TUSenha::VALOR_INVALIDO_SENHA = "AA1!#"; 
+const string TUSenha::VALOR_INVALIDO_SENHA = "AA1!#";
 
 // Domínio Endereco
 const string TUEndereco::VALOR_VALIDO_ENDERECO = "Rua Teste 101, Bairro X";
-const string TUEndereco::VALOR_INVALIDO_ENDERECO = " Comeca com espaco"; // Invalido: começa com espaço
+const string TUEndereco::VALOR_INVALIDO_ENDERECO = " Comeca com espaco";
 
 // Entidade Pessoa (Valores de setup)
 const string VALOR_VALIDO_NOME = "Maria Silva";
@@ -52,7 +55,7 @@ void TUNumero::testarCenarioValorInvalido() {
         estado = FALHA;
         cerr << "ERRO: TUNumero (Invalido): Excecao nao lancada para valor invalido." << endl;
     } catch (const invalid_argument& excecao) {
-        // Sucesso: Exceção de argumento inválido lançada.
+        // Sucesso
     } catch (...) {
         estado = FALHA;
         cerr << "ERRO: TUNumero (Invalido): Excecao de tipo inesperado lancada." << endl;
@@ -182,10 +185,10 @@ void TUPessoa::testarCenarioSucesso() {
     // 1. Cria objetos Domínio
     try {
         Nome nomeValido;
-        nomeValido.setValor(VALOR_VALIDO_NOME); // Assume que este nome é válido
+        nomeValido.setValor(VALOR_VALIDO_NOME);
 
         EMAIL emailValido;
-        emailValido.setValor(VALOR_VALIDO_EMAIL); // Assume que este email é válido
+        emailValido.setValor(VALOR_VALIDO_EMAIL);
 
         // 2. Atribui os Domínios à Entidade
         entidade->setNome(nomeValido);
@@ -235,8 +238,8 @@ void TUGerente::testarCenarioSucesso() {
         // Validação de atributos herdados (Pessoa)
         EMAIL emailValido;
         emailValido.setValor("gerente.teste@uni.br");
-        entidade->setEmail(emailValido); 
-        
+        entidade->setEmail(emailValido);
+
         // Validação de atributos próprios (Gerente)
         Senha senhaValida;
         senhaValida.setValor(TUSenha::VALOR_VALIDO_SENHA);
