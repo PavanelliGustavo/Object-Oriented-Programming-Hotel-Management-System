@@ -5,8 +5,9 @@
 #include "interfaces.hpp"
 #include "servicos.hpp"
 #include "containers.hpp"
-#include "apresentacao.hpp" // Contém CntrIUAutenticacao, CntrIUIntegracao, CntrIUReserva
-#include "testes.hpp"     // Contém TUNumero, TUPessoa, TUSenha, TUGerente
+#include "apresentacao.hpp" 
+#include "testes.hpp"     
+#include <exception> // Para a classe base exception
 
 using namespace std;
 
@@ -19,6 +20,7 @@ void rodarTestes() {
     TUNumero tuNumero;
     TUSenha tuSenha;
     TUGerente tuGerente;
+    // Adicionar outros testes aqui (TUEndereco, TUPessoa, etc.)
     
     // --- Testes de Domínio ---
     cout << "Teste TUNumero (Dominio): " << (tuNumero.run() == SUCESSO ? "SUCESSO" : "FALHA") << endl;
@@ -39,47 +41,77 @@ int main() {
     // --- Contêineres (Camada de Dados) ---
     ContainerGerente containerGerentes;
     ContainerReserva containerReservas;
-    // ... Declarar outros containers
+    ContainerHospede containerHospedes;
+    ContainerHotel containerHoteis;
+    ContainerQuarto containerQuartos;
     
     // --- Controladoras de Serviço (Camada de Serviço - LN) ---
     CntrLNAutenticacao ctrlLNAutenticacao;
-    CntrIUReserva ctrlIUReserva; // Seu módulo de Apresentação
-    CntrIUIntegracao ctrlIUIntegracao; // Menu Principal
+    CntrLNPessoa ctrlLNPessoa;
+    CntrLNReserva ctrlLNReserva;
+    CntrLNHotel ctrlLNHotel;
     
-    // --- Interfaces de Apresentação (IU) ---
+    // --- Controladoras de Apresentação (Camada de Apresentação - IU) ---
     CntrIUAutenticacao ctrlIUAutenticacao;
-    
+    CntrIUIntegracao ctrlIUIntegracao; // Menu Principal
+    CntrIUReserva ctrlIUReserva; // Seu subsistema (MAR)
+    // CntrIUPessoa ctrlIUPessoa; // Outras controladoras IU seriam declaradas aqui.
+    // CntrIUHotel ctrlIUHotel;
+
     // 3. INJEÇÃO DE DEPENDÊNCIA (LIGANDO AS CAMADAS)
     
     // A. Ligar Controladoras de Serviço aos seus Contêineres (Dados)
     ctrlLNAutenticacao.setContainer(&containerGerentes);
-    // ... Ligar CntrLNReserva ao containerReservas, etc.
+    
+    ctrlLNPessoa.setContainerGerente(&containerGerentes);
+    ctrlLNPessoa.setContainerHospede(&containerHospedes);
+    
+    ctrlLNReserva.setContainer(&containerReservas);
+    // Para checagem de conflito: ctrlLNReserva.setContainerQuarto(&containerQuartos);
+    
+    ctrlLNHotel.setContainerHotel(&containerHoteis);
+    ctrlLNHotel.setContainerQuarto(&containerQuartos);
+
 
     // B. Ligar Camada de Apresentação à Camada de Serviço (Interfaces)
     
-    // Ligar Login ao Serviço de Autenticação
+    // Login -> Serviço de Autenticação
     ctrlIUAutenticacao.setInterfaceServico(&ctrlLNAutenticacao);
+    
+    // Reservas -> Serviço de Reservas
+    ctrlIUReserva.setInterfaceServico(&ctrlLNReserva);
 
-    // Ligar Módulos de Apresentação entre si e ao Serviço
-    // O Módulo de Login precisa saber para onde ir após o sucesso (Ctrl de Integração)
+
+    // C. Ligar Módulos de Apresentação entre si (Navegação)
+    
+    // Login -> Menu Principal (MAI)
     ctrlIUAutenticacao.setControladorIntegracao(&ctrlIUIntegracao);
 
-    // O Menu Principal (Ctrl Integração) precisaria de referências para os outros menus...
-    // ctrlIUIntegracao.setCtrlReserva(&ctrlIUReserva); 
-    
+    // Menu Principal (MAI) -> Menu de Reservas (MAR)
+    ctrlIUIntegracao.setCtrlReserva(&ctrlIUReserva); 
+    // Outras ligações: ctrlIUIntegracao.setCtrlPessoa(&ctrlIUPessoa);
+
+
     // 4. PREPARAÇÃO DE DADOS INICIAIS (Smoke Test)
-    // Inserir um Gerente válido para testar a autenticação
+    // Inserir um Gerente válido para testar a autenticação (EMAIL e SENHA válidos)
     try {
         EMAIL emailInicial;
         emailInicial.setValor("admin@hotel.com");
         
         Senha senhaInicial;
-        senhaInicial.setValor("A1!b#"); // Senha válida para o teste
+        senhaInicial.setValor("A1!b#"); 
+        
+        Nome nomeInicial;
+        nomeInicial.setValor("Admin Hotel"); 
+        
+        Ramal ramalInicial;
+        ramalInicial.setValor(10); // Ramal válido
         
         Gerente gerenteInicial;
         gerenteInicial.setEmail(emailInicial);
         gerenteInicial.setSenha(senhaInicial);
-        // ... setar Nome, Ramal, etc.
+        gerenteInicial.setNome(nomeInicial);
+        gerenteInicial.setRamal(ramalInicial);
 
         containerGerentes.incluir(gerenteInicial);
         cout << "SUCESSO: Gerente inicial 'admin@hotel.com' inserido para teste.\n";
