@@ -39,7 +39,7 @@ class TUNumero : public TUDominio {
 private:
     const static int VALOR_VALIDO = 42;
     const static int VALOR_INVALIDO = 1000;
-    
+
     Numero* dominio;
     int estado;
 
@@ -60,11 +60,6 @@ public:
  */
 class TUSenha : public TUDominio {
 private:
-    // Senha válida: 5 caracteres, mista, sem repetição de tipo. Ex: A1!b#
-    const static string VALOR_VALIDO_SENHA;
-    // Senha inválida: Falha na sequência (Duas letras seguidas). Ex: AA1!#
-    const static string VALOR_INVALIDO_SENHA;
-
     Senha* dominio;
     int estado;
 
@@ -74,6 +69,10 @@ private:
     void testarCenarioValorInvalido();
 
 public:
+    // Senha válida: 5 caracteres, mista, sem repetição de tipo. Ex: A1!b#
+    const static string VALOR_VALIDO_SENHA;
+    // Senha inválida: Falha na sequência (Duas letras seguidas). Ex: AA1!#
+    const static string VALOR_INVALIDO_SENHA;
     int run();
 };
 
@@ -86,10 +85,10 @@ public:
 class TUEndereco : public TUDominio {
 private:
     // Exemplo: Rua Apto 101. (5 a 30 caracteres, sem especial no início/fim)
-    const static string VALOR_VALIDO_ENDERECO; 
+    const static string VALOR_VALIDO_ENDERECO;
     // Exemplo: Começa com espaço, o que é inválido.
-    const static string VALOR_INVALIDO_ENDERECO; 
-    
+    const static string VALOR_INVALIDO_ENDERECO;
+
     Endereco* dominio;
     int estado;
 
@@ -115,7 +114,7 @@ public:
 class TUPessoa {
 private:
     const static int ESTADO_INICIAL = 0;
-    
+
     Pessoa* entidade;
     int estado;
 
