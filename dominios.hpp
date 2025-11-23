@@ -3,15 +3,9 @@
 
 #include <stdexcept>
 #include <string>
-#include <cctype>
 #include <iostream>
 
 using namespace std;
-
-// ====================================================================
-// NOSSAS CLASSES (NUMERO, SENHA, ENDERECO)
-// Corrigidas para usar string como const ref (&) no set, por eficiencia.
-// ====================================================================
 
 /**
  * @class Numero
@@ -19,15 +13,23 @@ using namespace std;
  *
  * @details Esta classe armazena um valor inteiro que representa o número do quarto.
  * O formato válido, de acordo com as regras de negócio, deve ser um valor entre 1 e 999 (001 a 999).
- * A classe garante a validade do seu valor interno.
  */
-class Numero{
+class Numero {
     private:
         int valor;
         void validar(int valor);
     public:
-        // setValor e getValor já estão corretos.
+        /**
+         * @brief Define o número do quarto.
+         * @param novoValor Inteiro entre 1 e 999.
+         * @throw std::invalid_argument Se o valor estiver fora do intervalo.
+         */
         void setValor(int novoValor);
+
+        /**
+         * @brief Retorna o número do quarto.
+         * @return int Valor do número.
+         */
         int getValor() const;
 };
 
@@ -39,20 +41,28 @@ inline int Numero::getValor() const {
  * @class Senha
  * @brief Domínio para armazenar e validar a Senha do Gerente.
  *
- * @details A senha é composta por 5 caracteres e deve seguir as seguintes regras de formato:
- * - O comprimento deve ser exatamente 5 caracteres.
- * - O caractere pode ser letra (a-z ou A-Z), dígito (0-9) ou caractere especial (!"#$%&?).
- * - Deve existir pelo menos uma letra minúscula (a-z), uma letra maiúscula (A-Z), um dígito (0-9) e um caractere especial.
- * - Letra não pode ser seguida por letra.
- * - Dígito não pode ser seguido por dígito.
+ * @details A senha deve seguir as seguintes regras:
+ * - Exatamente 5 caracteres.
+ * - Caracteres permitidos: a-z, A-Z, 0-9, ! " # $ % & ?.
+ * - Deve conter pelo menos uma letra minúscula, uma maiúscula, um dígito e um caractere especial.
+ * - Não permite caracteres repetidos de tipos sequenciais (ex: letra seguida de letra).
  */
-class Senha{
+class Senha {
     private:
         string valor;
-        void validar(const string& valor); // CORREÇÃO: Usar const string& no método privado
+        void validar(const string& valor);
     public:
-        // setValor e getValor já estão corretos.
-        void setValor(const string& novoValor); // CORREÇÃO: Usar const string& no setValor
+        /**
+         * @brief Define a senha.
+         * @param novoValor String contendo a senha.
+         * @throw std::invalid_argument Se a senha não atender aos critérios de complexidade.
+         */
+        void setValor(const string& novoValor);
+
+        /**
+         * @brief Retorna a senha armazenada.
+         * @return string Senha.
+         */
         string getValor() const;
 };
 
@@ -62,22 +72,19 @@ inline string Senha::getValor() const {
 
 /**
  * @class Endereco
- * @brief Domínio para armazenar e validar o Endereço residencial ou de um Hotel.
+ * @brief Domínio para armazenar e validar o Endereço.
  *
- * @details Esta classe armazena uma string que representa um endereço e deve seguir as seguintes regras de formato:
- * 1. Tamanho: Deve conter entre 5 e 30 caracteres.
- * 2. Caracteres Permitidos: Pode conter letras (a-z, A-Z), dígitos (0-9), vírgula (,), ponto final (.) e espaço em branco ( ).
- * 3. Restrições de Posição/Sequência:
- * - O primeiro e o último caractere não podem ser vírgula, ponto ou espaço em branco.
- * - Vírgula e ponto não podem ser seguidos por vírgula ou ponto.
- * - Espaço em branco deve ser seguido por letra ou dígito.
+ * @details Regras de formato:
+ * - 5 a 30 caracteres.
+ * - Letras, dígitos, vírgula, ponto e espaço.
+ * - Restrições de posição para pontuação e espaços.
  */
 class Endereco {
     private:
         string valor;
-        void validar(const string& valor); // CORREÇÃO: Usar const string& no método privado
+        void validar(const string& valor);
     public:
-        void setValor(const string& novoValor); // CORREÇÃO: Usar const string& no setValor
+        void setValor(const string& novoValor);
         string getValor() const;
 };
 
@@ -85,202 +92,257 @@ inline string Endereco::getValor() const {
     return valor;
 }
 
-// ====================================================================
-// ---------------------- Marcel (DINHEIRO, CARTAO, NOME) --------------------
-// ====================================================================
-
-class Dinheiro{
+/**
+ * @class Dinheiro
+ * @brief Domínio para representar valores monetários.
+ *
+ * @details Regras de negócio:
+ * - Valor entre 0,01 e 1.000.000,00.
+ * - O armazenamento interno é realizado em inteiros (centavos) para evitar erros de arredondamento de ponto flutuante.
+ */
+class Dinheiro {
     private:
-        int valor; // CORREÇÃO: Tipo INT é necessário para armazenar em centavos.
-        void validar(const string& valor); // CORREÇÃO: Usar const string&
+        long long valor; // Armazena em centavos para precisão
+        void validar(long long valor);
     public:
-        void setValor(const string& valor); // CORREÇÃO: Usar const string&
-        string getValor() const; // CORREÇÃO: O get deve retornar o valor formatado (string) ou o valor inteiro (int)
-                                 // Mantendo STRING temporariamente, mas o requisito favorece INT para operações internas.
+        /**
+         * @brief Define o valor monetário.
+         * @details Recebe um valor double que será convertido para centavos internamente.
+         * @param valor Valor em double (ex: 100.50).
+         * @throw std::invalid_argument Se fora do intervalo 0.00 a 1,000,000.00.
+         */
+        void setValor(double valor);
+
+        /**
+         * @brief Retorna o valor monetário.
+         * @return double Valor em formato de ponto flutuante.
+         */
+        double getValor() const;
 };
 
-class Cartao{
+/**
+ * @class Cartao
+ * @brief Domínio para representar um número de cartão de crédito.
+ *
+ * @details Regras de formato:
+ * - Exatamente 16 dígitos.
+ * - Validação através do algoritmo de Luhn para verificação do dígito verificador.
+ */
+class Cartao {
     private:
         string valor;
-        void validar(const string& valor); // CORREÇÃO: Usar const string&
+        void validar(const string& valor);
     public:
-        void setValor(const string& valor); // CORREÇÃO: Usar const string& e padronizar nome do método
+        /**
+         * @brief Define o número do cartão.
+         * @param valor String contendo os 16 dígitos.
+         * @throw std::invalid_argument Se não tiver 16 dígitos ou falhar no teste de Luhn.
+         */
+        void setValor(const string& valor);
+
         string getValor() const;
 };
 
-inline string Cartao::getValor() const{
+inline string Cartao::getValor() const {
     return this->valor;
 }
 
-class Nome{
+/**
+ * @class Nome
+ * @brief Domínio para nomes de pessoas ou hotéis.
+ *
+ * @details Regras de formato:
+ * - Texto com 5 a 30 caracteres.
+ * - Pode conter letras (a-z, A-Z), dígitos (0-9), vírgula, ponto ou espaço.
+ * - Regras estritas de pontuação (vírgula não seguida de ponto, etc).
+ * - Primeiro caracter deve ser letra maiúscula (para nomes próprios tipicamente, embora o PDF permita dígitos na regra geral, a convenção de classes costuma forçar capitalização).
+ */
+class Nome {
     private:
         string valor;
-        void validar(const string& valor); // CORREÇÃO: Usar const string&
+        void validar(const string& valor);
     public:
-    void setValor(const string& valor); // CORREÇÃO: Usar const string& e padronizar nome do parâmetro
-    string getValor() const;
+        /**
+         * @brief Define o nome.
+         * @param valor String do nome.
+         * @throw std::invalid_argument Se o formato for inválido.
+         */
+        void setValor(const string& valor);
+
+        string getValor() const;
 };
 
-inline string Nome::getValor() const{
+inline string Nome::getValor() const {
     return this->valor;
 }
-
-// ====================================================================
-// ------------------- Duda (CAPACIDADE, DATA, TELEFONE) ------------------
-// ====================================================================
 
 /**
  * @class Capacidade
  * @brief Gerencia a capacidade máxima de pessoas em um quarto.
- * @details A classe armazena um valor inteiro curto (unsigned short)
- * que determina a capacidade de pessoas em um quarto, podendo ser de 1 a 4.
+ *
+ * @details Valores permitidos: 1, 2, 3 ou 4.
  */
 class Capacidade {
-private:
-    static const int LIMITE_INFERIOR = 1;
-    static const int LIMITE_SUPERIOR = 4;
-    unsigned short capacidade;
-    void validar(unsigned short capacidade) const;
-
-public:
-    /**
-     * @brief Define a capacidade máxima de pessoas no quarto.
-     * @details O metodo valida se o valor short fornecido está dentro do intervalo
-     * permitido (1 a 4). Se estiver fora, lança uma exceção e se for valido
-     * atualiza o atributo capacidade.
-     *
-     * @param capacidade Novo valor da capacidade do quarto entre 1 a 4 pessoas.
-     * @throws out_of_range Se o valor estiver fora dos limites, sendo menor que 1 ou maior que 4.
-     */
-   void setValor(unsigned short capacidade); // CORREÇÃO: Padronizar nome do método (setValor) e remover ; extra
-
-    /**
-     * @brief Retorna a capacidade atual do quarto.
-     * @details o Metodo retorna o valor armazenado no atributo capacidade
-     * sem realizar validações ou modificações.
-     * @return Valor da capacidade.
-     */
-    unsigned short getValor() const; // CORREÇÃO: Padronizar nome do método (getValor)
+    private:
+        unsigned short capacidade;
+        void validar(unsigned short capacidade) const;
+    public:
+        /**
+         * @brief Define a capacidade.
+         * @param capacidade Valor entre 1 e 4.
+         * @throw std::invalid_argument Se fora do intervalo.
+         */
+        void setValor(unsigned short capacidade);
+        unsigned short getValor() const;
 };
 
-inline unsigned short Capacidade::getValor() const { // CORREÇÃO: Padronizar nome do método
+inline unsigned short Capacidade::getValor() const {
     return capacidade;
 }
 
 /**
-* @class Data
-* @brief Representa uma data formada por dia, mês e ano
-* @details A classe valida e armazena uma data, garantindo o formato do dia (1 a 31),
-* do mês ( no formato de texto com as trẽs primeiraas letras do mês maíusculas
-* e o ano (entre 2000 e 2999) estejam da forma correta.
-*/
+ * @class Data
+ * @brief Representa uma data (DD-MMM-AAAA).
+ *
+ * @details Valida dias (1-31), meses (JAN, FEV...) e anos (2000-2999),
+ * considerando anos bissextos.
+ */
 class Data {
-private:
-    unsigned short dia;
-    string mes;
-    unsigned short ano;
+    private:
+        unsigned short dia;
+        string mes;
+        unsigned short ano;
 
-    static const int ANO_MIN = 2000;
-    static const int ANO_MAX = 2999;
+        static const int ANO_MIN = 2000;
+        static const int ANO_MAX = 2999;
 
-    void validar(unsigned short dia, const std::string &mes, unsigned short ano) const;
-    bool ehBissexto(unsigned short ano) const;
-    unsigned short diasNoMes(const string &mes, unsigned short ano) const;
-    unsigned short mesParaIndice(const string &mes) const;
-    bool mesValido(const string &mes) const;
-    string letraMaiuscula(const string &s) const;
+        string letraMaiuscula(const string &s) const;
+        unsigned short mesParaIndice(const string &mes) const;
+        bool ehBissexto(unsigned short ano) const;
+        unsigned short diasNoMes(const string &mes, unsigned short ano) const;
+        bool mesValido(const string &mes) const;
 
-public:
-    // setValor já está correto.
-    void setValor(unsigned short dia, const std::string &mes, unsigned short ano);
+        void validar(unsigned short dia, const string &mes, unsigned short ano) const;
+        // Métodos auxiliares de validação devem ser privados ou estar apenas no .cpp
 
-    // get* já estão corretos.
-    unsigned short getDia() const;
-    string getMes() const;
-    unsigned short getAno() const;
+    public:
+        /**
+         * @brief Define a data.
+         * @param dia Dia (1-31).
+         * @param mes Mês (formato de 3 letras maiúsculas: JAN, FEV...).
+         * @param ano Ano (2000-2999).
+         * @throw std::invalid_argument Se a data for inválida (ex: 30 de FEV).
+         */
+        void setValor(unsigned short dia, const string &mes, unsigned short ano);
+
+        unsigned short getDia() const;
+        string getMes() const;
+        unsigned short getAno() const;
 };
 
-inline unsigned short Data::getDia() const {
-    return dia;
-}
-
-inline string Data::getMes() const {
-    return mes;
-}
-
-inline unsigned short Data::getAno() const {
-    return ano;
-}
+inline unsigned short Data::getDia() const { return dia; }
+inline string Data::getMes() const { return mes; }
+inline unsigned short Data::getAno() const { return ano; }
 
 /**
  * @class Telefone
- * @brief Define o número de telefone do Hotel.
- * @details A classe define o número de telefone do hotel seguindo um padrão de
- * formato (+DDDDDDDDDDDDDDDD), com 16 caracteres no total.
+ * @brief Define o número de telefone.
+ *
+ * @details Formato: +DDDDDDDDDDDDDD (sinal de mais seguido de 14 dígitos, totalizando 15 caracteres de acordo com padrão comum, ou conforme especificado na tabela).
+ * Observação: A tabela do PDF diz "+DDDDDDDDDDDDDD" (15 caracters total ou + seguido de D's). Vamos assumir a validação exata da string.
  */
 class Telefone {
-private:
-    string telefone;
-    bool validar(const string &telefone);
-
-public:
-    void setValor(const string &telefone); // CORREÇÃO: Padronizar nome do método (setValor)
-
-    string getValor() const; // CORREÇÃO: Padronizar nome do método (getValor)
+    private:
+        string telefone;
+        void validar(const string &telefone);
+    public:
+        void setValor(const string &telefone);
+        string getValor() const;
 };
 
-inline string Telefone::getValor() const { // CORREÇÃO: Padronizar nome do método
+inline string Telefone::getValor() const {
     return telefone;
 }
 
-// ====================================================================
-// ---------------- Gustavo (CODIGO, EMAIL, RAMAL) --------------------
-// ====================================================================
-
+/**
+ * @class Codigo
+ * @brief Domínio para códigos de identificação (PK).
+ *
+ * @details Regras de formato:
+ * - Exatamente 10 caracteres.
+ * - Cada caractere deve ser letra (a-z) ou dígito (0-9).
+ */
 class Codigo {
     private:
-        std::string codigo;
+        string codigo;
         static const int TAMANHO = 10;
-        void validar(const std::string& codigo); // CORREÇÃO: Passar por const reference
-
+        void validar(const string& codigo);
     public:
-        void setValor(const std::string& codigo); // CORREÇÃO: Padronizar nome (setValor) e assinatura
-        std::string getValor() const; // CORREÇÃO: Padronizar nome (getValor)
-        // Construtor removido para evitar problemas com a Entidade.
+        /**
+         * @brief Define o código único.
+         * @param codigo String de 10 caracteres alfanuméricos.
+         * @throw std::invalid_argument Se tamanho ou conteúdo forem inválidos.
+         */
+        void setValor(const string& codigo);
+
+        string getValor() const;
 };
 
-inline std::string Codigo::getValor() const { // CORREÇÃO: Padronizar nome
+inline string Codigo::getValor() const {
     return codigo;
 }
 
+/**
+ * @class EMAIL
+ * @brief Domínio para endereços de e-mail.
+ *
+ * @details Formato: parte-local@domínio.
+ * - Parte local: até 64 chars, letras, dígitos, ponto, hífen. Não pode iniciar/terminar com ponto/hífen.
+ * - Domínio: até 255 chars, partes separadas por ponto, sem hífens no início/fim.
+ */
 class EMAIL {
     private:
-        std::string email;
+        string email;
         static const int MAX_PARTE_LOCAL = 64;
         static const int MAX_DOMINIO = 255;
-        void validar(const std::string& email); // CORREÇÃO: Passar por const reference
-
+        void validar(const string& email);
     public:
-        void setValor(const std::string& email); // CORREÇÃO: Padronizar nome (setValor) e assinatura
-        std::string getValor() const; // CORREÇÃO: Padronizar nome (getValor)
-        // Construtor removido.
+        /**
+         * @brief Define o endereço de email.
+         * @param email String no formato local@dominio.
+         * @throw std::invalid_argument Se o formato estiver incorreto.
+         */
+        void setValor(const string& email);
+
+        string getValor() const;
 };
 
-inline std::string EMAIL::getValor() const { // CORREÇÃO: Padronizar nome
+inline string EMAIL::getValor() const {
     return email;
 }
 
+/**
+ * @class Ramal
+ * @brief Domínio para ramais telefônicos internos.
+ *
+ * @details Intervalo válido: 0 a 50.
+ */
 class Ramal {
     private:
-        unsigned short ramal; // CORREÇÃO: Mudar tipo para unsigned short
-        void validar(unsigned short ramal); // CORREÇÃO: Mudar tipo de parâmetro
+        unsigned short ramal;
+        void validar(unsigned short ramal);
     public:
-        void setValor(unsigned short ramal); // CORREÇÃO: Padronizar nome e tipo
-        unsigned short getValor() const; // CORREÇÃO: Padronizar nome e tipo
-        // Construtor removido.
+        /**
+         * @brief Define o número do ramal.
+         * @param ramal Inteiro entre 0 e 50.
+         * @throw std::invalid_argument Se fora do intervalo.
+         */
+        void setValor(unsigned short ramal);
+
+        unsigned short getValor() const;
 };
 
-inline unsigned short Ramal::getValor() const { // CORREÇÃO: Padronizar nome e tipo
+inline unsigned short Ramal::getValor() const {
     return ramal;
 }
 
