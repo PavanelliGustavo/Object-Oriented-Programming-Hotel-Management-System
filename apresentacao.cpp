@@ -1,288 +1,321 @@
 #include "apresentacao.hpp"
 #include <iostream>
 #include <stdexcept>
-#include <sstream>
 #include <limits>
+#include <string>
 
 using namespace std;
 
-// Funções Auxiliares para Limpar Entrada
+// ====================================================================
+// FUNÇÕES UTILITÁRIAS
+// ====================================================================
+
 void limparBuffer() {
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
-// ====================================================================
-// FUNÇÃO AUXILIAR: COLETAR E VALIDAR DADOS DE RESERVA
-// ====================================================================
-
-/**
- * @brief Coleta todos os dados de domínio necessários para criar/atualizar uma Reserva,
- * validando o formato de entrada.
- * @return true se todos os dados foram coletados e validados com sucesso; false caso contrário.
- */
-bool CntrIUReserva::coletarDadosReserva(Reserva* reserva) {
-    string codigoStr, chegadaDiaStr, chegadaMesStr, chegadaAnoStr,
-           partidaDiaStr, partidaMesStr, partidaAnoStr, valorStr;
-
-    // Domínios temporários
-    Codigo domCodigo;
-    Data domChegada, domPartida;
-    Dinheiro domValor;
-
-    // Coleta e Validação do Código
-    cout << "Digite o Codigo da Reserva (10 caracteres alfanumericos): ";
-    cin >> codigoStr;
-    try {
-        domCodigo.setValor(codigoStr);
-        reserva->setCodigo(domCodigo);
-    } catch (const invalid_argument& e) {
-        cout << "ERRO DE FORMATO: " << e.what() << endl;
-        return false;
-    }
-
-    // Coleta e Validação de Datas (Simplificado para o exemplo)
-    cout << "--- Data de Chegada ---" << endl;
-    cout << "Dia (1-31): "; cin >> chegadaDiaStr;
-    cout << "Mes (JAN, FEV, ...): "; cin >> chegadaMesStr;
-    cout << "Ano (2000-2999): "; cin >> chegadaAnoStr;
-
-    try {
-        unsigned short dia = stoi(chegadaDiaStr);
-        unsigned short ano = stoi(chegadaAnoStr);
-        // O Domínio Data precisa ser capaz de receber strings e convertê-las/validá-las
-        domChegada.setValor(dia, chegadaMesStr, ano);
-        reserva->setChegada(domChegada);
-    } catch (const exception& e) {
-        cout << "ERRO DE FORMATO NA DATA DE CHEGADA: " << e.what() << endl;
-        return false;
-    }
-
-    // Coleta e Validação do Valor
-    cout << "Digite o Valor Total (0,01 a 1.000.000,00): ";
-    cin >> valorStr;
-    try {
-        domValor.setValor(valorStr);
-        reserva->setValor(domValor);
-    } catch (const invalid_argument& e) {
-        cout << "ERRO DE FORMATO NO VALOR: " << e.what() << endl;
-        return false;
-    }
-
-    // Se todos os Domínios validaram, retorna true.
-    return true;
+void esperarEnter() {
+    cout << "\nPressione Enter para continuar...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
 }
 
 // ====================================================================
-// CONTROLADORA DE APRESENTAÇÃO: INTEGRAÇÃO (MAI)
+// 1. IMPLEMENTAÇÃO: CONTROLADORA DE AUTENTICAÇÃO (MAA)
 // ====================================================================
 
-void CntrIUIntegracao::executar() {
-    int opcao = 0;
-    while (autenticado && opcao != 5) {
-        cout << "\n=========================================\n";
-        cout << "   MENU PRINCIPAL DO SISTEMA DE HOTEIS\n";
-        cout << "=========================================\n";
-        cout << "1 - Gerenciar Pessoas (Gerente/Hospede)\n";
-        cout << "2 - Gerenciar Hoteis e Quartos\n";
-        cout << "3 - Gerenciar Reservas\n";
-        cout << "4 - Listagens Gerais (Hoteis, Quartos, etc.)\n";
-        cout << "5 - Deslogar e Sair\n";
-        cout << "Selecione uma opcao: ";
-
-        if (!(cin >> opcao)) {
-            cout << "Opcao invalida. Tente novamente." << endl;
-            cin.clear();
-            limparBuffer();
-            continue;
-        }
-
-        switch (opcao) {
-            case 1:
-                // if (ctrlPessoa) ctrlPessoa->executar();
-                cout << "Acessando Gerenciamento de Pessoas (Ainda nao implementado)..." << endl;
-                break;
-            case 2:
-                // if (ctrlHotel) ctrlHotel->executar();
-                cout << "Acessando Gerenciamento de Hoteis e Quartos (Ainda nao implementado)..." << endl;
-                break;
-            case 3:
-                // CORREÇÃO: Usar a referência injetada para executar o menu de Reservas.
-                if (ctrlReserva) ctrlReserva->executar();
-                else cout << "Erro: Modulo de Reservas nao foi ligado.\n";
-                break;
-            case 4:
-                cout << "Acessando Listagens (Ainda nao implementado)..." << endl;
-                break;
-            case 5:
-                autenticado = false; // Desloga e sai do loop.
-                cout << "Deslogado. Encerrando o sistema." << endl;
-                break;
-            default:
-                cout << "Opcao invalida.\n";
-        }
-    }
-}
-
-// ====================================================================
-// CONTROLADORA DE APRESENTAÇÃO: AUTENTICAÇÃO (MAA)
-// ====================================================================
-
-bool CntrIUAutenticacao::executar() {
+bool CntrMAAutenticacao::executar(EMAIL& email) {
     string emailStr, senhaStr;
-    bool autenticacaoSucesso = false;
 
-    // Loop para tentar login
     while (true) {
-        cout << "\n--- AUTENTICACAO DO GERENTE ---\n";
-        cout << "Digite seu EMAIL (PK): ";
+        cout << "\n=========================================\n";
+        cout << "          LOGIN - SISTEMA HOTELEIRO      \n";
+        cout << "=========================================\n";
+        cout << "Digite seu EMAIL (ou 'sair' para encerrar): ";
         cin >> emailStr;
+
+        if (emailStr == "sair") return false;
+
         cout << "Digite sua SENHA: ";
         cin >> senhaStr;
 
         try {
-            // 1. Validação de formato (Domínio)
+            // 1. Validação de formato (Domínios)
             EMAIL domEmail;
             domEmail.setValor(emailStr);
 
             Senha domSenha;
             domSenha.setValor(senhaStr);
 
-            // 2. Delega a verificação para a Camada de Serviço
+            // 2. Delega para a Camada de Serviço
             if (servicoAutenticacao->autenticar(domEmail, domSenha)) {
-                cout << "\nSUCESSO: Gerente autenticado!" << endl;
-
-                // 3. Informa o Menu Principal (MAI) que o login foi feito
-                controladorIntegracao->setAutenticado(true);
-                autenticacaoSucesso = true;
-                break;
+                cout << "\n[!] SUCESSO: Autenticado com êxito!" << endl;
+                email = domEmail; // Preenche o email do usuário logado para a Integradora
+                return true;
             } else {
-                cout << "\nFALHA: Email ou Senha invalidos. Tente novamente." << endl;
+                cout << "\n[X] FALHA: Email ou Senha incorretos." << endl;
             }
 
         } catch (const invalid_argument& e) {
-            // Captura a exceção lançada pelo Domínio (e.g., Email ou Senha mal formatados)
-            cout << "\nERRO DE FORMATO: " << e.what() << endl;
+            cout << "\n[X] ERRO DE FORMATO: " << e.what() << endl;
         }
 
-        cout << "Pressione Enter para continuar...";
-        cin.ignore(numeric_limits<streamsize>::max(), '\n'); // Limpa buffer
-        cin.get();
+        // Limpa buffer residual se necessário antes de repetir
+        limparBuffer();
     }
-
-    return autenticacaoSucesso;
 }
 
 // ====================================================================
-// MÉTODOS DE EXECUÇÃO (MAR)
+// 2. IMPLEMENTAÇÃO: CONTROLADORA PESSOAL (MAP)
 // ====================================================================
 
-void CntrIUReserva::executarCriarReserva() {
-    Reserva novaReserva;
-    cout << "\n--- EXECUTAR CRIAR RESERVA ---\n";
+void CntrMAPessoal::executar(const EMAIL& email) {
+    int opcao = 0;
+    while (opcao != 3) {
+        cout << "\n=========================================\n";
+        cout << "           MEU PERFIL (GERENTE)          \n";
+        cout << "=========================================\n";
+        cout << "Usuario Logado: " << email.getValor() << endl;
+        cout << "-----------------------------------------\n";
+        cout << "1 - Visualizar Meus Dados\n";
+        cout << "2 - Editar Perfil (Não implementado)\n";
+        cout << "3 - Voltar ao Menu Principal\n";
+        cout << "Selecione: ";
+        cin >> opcao;
 
-    if (!coletarDadosReserva(&novaReserva)) {
-        cout << "Operacao abortada devido a erro de formato de dados." << endl;
-        return;
-    }
+        if (cin.fail()) { cin.clear(); limparBuffer(); continue; }
 
-    // Delega a ação para a Camada de Serviço (MSR)
-    if (servicoReservas->criarReserva(novaReserva)) {
-        cout << "SUCESSO: Reserva criada e salva!" << endl;
-    } else {
-        cout << "FALHA: Nao foi possivel criar a reserva (codigo duplicado ou conflito)." << endl;
-    }
-}
-
-void CntrIUReserva::executarDeletarReserva() {
-    string codigoStr;
-    cout << "\n--- EXECUTAR DELETAR RESERVA ---\n";
-    cout << "Digite o Codigo da Reserva a ser deletada: ";
-    cin >> codigoStr;
-
-    try {
-        Codigo domCodigo;
-        domCodigo.setValor(codigoStr);
-
-        if (servicoReservas->deletarReserva(domCodigo)) {
-            cout << "SUCESSO: Reserva deletada." << endl;
-        } else {
-            cout << "FALHA: Reserva nao encontrada." << endl;
+        switch(opcao) {
+            case 1: {
+                try {
+                    // Busca dados atualizados no serviço
+                    Gerente gerente = servicoPessoa->lerGerente(email);
+                    cout << "\n--- DADOS DO GERENTE ---\n";
+                    cout << "Nome:  " << gerente.getNome().getValor() << endl;
+                    cout << "Email: " << gerente.getEmail().getValor() << endl;
+                    cout << "Ramal: " << gerente.getRamal().getValor() << endl;
+                    cout << "Senha: *****" << endl;
+                } catch (...) {
+                    cout << "Erro ao recuperar dados do perfil." << endl;
+                }
+                esperarEnter();
+                break;
+            }
+            case 2:
+                cout << "Funcionalidade de edicao em desenvolvimento." << endl;
+                esperarEnter();
+                break;
+            case 3:
+                break;
+            default:
+                cout << "Opcao invalida." << endl;
         }
-    } catch (const invalid_argument& e) {
-        cout << "ERRO DE FORMATO: " << e.what() << endl;
     }
 }
 
-void CntrIUReserva::executarPesquisarReserva() {
-    string codigoStr;
-    cout << "\n--- EXECUTAR PESQUISAR RESERVA ---\n";
-    cout << "Digite o Codigo da Reserva para pesquisa: ";
-    cin >> codigoStr;
-
-    try {
-        Codigo domCodigo;
-        domCodigo.setValor(codigoStr);
-
-        Reserva resultado = servicoReservas->lerReserva(domCodigo);
-
-        // Critério para saber se a reserva foi encontrada:
-        // A chave primária (Codigo) do resultado é diferente de um valor padrão.
-        if (resultado.getCodigo().getValor() == domCodigo.getValor()) {
-             cout << "SUCESSO: Reserva encontrada. Codigo: " << resultado.getCodigo().getValor() << endl;
-             // Aqui mostraria outros dados como datas e valor.
-        } else {
-            cout << "FALHA: Reserva nao encontrada." << endl;
-        }
-    } catch (const invalid_argument& e) {
-        cout << "ERRO DE FORMATO: " << e.what() << endl;
-    }
+void CntrMAPessoal::editarPerfil(const EMAIL& email) {
+    // Implementação futura
 }
 
-void CntrIUReserva::executarListarReservas() {
-    cout << "\n--- LISTA DE RESERVAS ---\n";
-    list<Reserva> reservas = servicoReservas->listarReservas();
+// ====================================================================
+// 3. IMPLEMENTAÇÃO: CONTROLADORA DE RESERVAS E INFRA (MAR)
+// ====================================================================
 
-    if (reservas.empty()) {
-        cout << "Nenhuma reserva cadastrada." << endl;
-        return;
-    }
-
-    for (const Reserva& r : reservas) {
-        cout << " - Codigo: " << r.getCodigo().getValor() << " | [Detalhes omitidos]" << endl;
-    }
-}
-
-void CntrIUReserva::executar() {
-    // Menu simples para demonstrar a navegação
+void CntrMAReserva::executar(const EMAIL& email) {
     int opcao = 0;
     while (opcao != 5) {
-        cout << "\n--- MENU RESERVAS (MAR) ---\n";
-        cout << "1 - Criar Reserva\n";
-        cout << "2 - Deletar Reserva\n";
-        cout << "3 - Pesquisar Reserva\n";
-        cout << "4 - Listar Reservas\n";
-        cout << "5 - Voltar\n";
-        cout << "Selecione uma opcao: ";
+        cout << "\n=========================================\n";
+        cout << "      GESTÃO DE RESERVAS E HOTEL         \n";
+        cout << "=========================================\n";
+        cout << "1 - Gerenciar Reservas\n";
+        cout << "2 - Gerenciar Hoteis\n";
+        cout << "3 - Gerenciar Quartos\n";
+        cout << "4 - Gerenciar Hospedes\n";
+        cout << "5 - Voltar ao Menu Principal\n";
+        cout << "Selecione: ";
+        cin >> opcao;
 
-        if (!(cin >> opcao)) {
-            cout << "Opcao invalida. Tente novamente." << endl;
-            cin.clear();
-            limparBuffer();
-            continue;
-        }
+        if (cin.fail()) { cin.clear(); limparBuffer(); continue; }
 
         switch (opcao) {
-            case 1: executarCriarReserva(); break;
-            case 2: executarDeletarReserva(); break;
-            case 3: executarPesquisarReserva(); break;
-            case 4: executarListarReservas(); break;
+            case 1: menuReservas(); break;
+            case 2: menuHoteis(); break;
+            case 3: menuQuartos(); break;
+            case 4: menuHospedes(); break;
             case 5: break;
-            default: cout << "Opcao invalida.\n";
+            default: cout << "Opcao invalida." << endl;
         }
     }
 }
 
-void CntrIUReserva::executarAtualizarReserva() {
-    cout << "Funcionalidade de Atualizar Reserva ainda nao implementada." << endl;
-    // Esta função chamaria coletarDadosReserva() e depois servicoReservas->atualizarReserva()
+// --- SUB-MENU: RESERVAS ---
+
+void CntrMAReserva::menuReservas() {
+    int opcao = 0;
+    while (opcao != 5) {
+        cout << "\n--- MENU RESERVAS ---\n";
+        cout << "1 - Criar Nova Reserva\n";
+        cout << "2 - Listar Reservas\n";
+        cout << "3 - Pesquisar Reserva (por Codigo)\n";
+        cout << "4 - Cancelar/Deletar Reserva\n";
+        cout << "5 - Voltar\n";
+        cout << "Selecione: ";
+        cin >> opcao;
+
+        if (cin.fail()) { cin.clear(); limparBuffer(); continue; }
+
+        switch(opcao) {
+            case 1: {
+                // Lógica de Criar Reserva
+                Reserva novaReserva;
+                // Coleta de dados manual para demonstração
+                try {
+                    string codigoStr, valStr, diaI, mesI, anoI, diaF, mesF, anoF;
+                    Codigo cod; Data dtIni; Data dtFim; Dinheiro val;
+
+                    cout << "Codigo (10 carac): "; cin >> codigoStr;
+                    cod.setValor(codigoStr);
+
+                    cout << "Data Chegada (DD MMM AAAA): "; cin >> diaI >> mesI >> anoI;
+                    dtIni.setValor(stoi(diaI), mesI, stoi(anoI));
+
+                    cout << "Data Partida (DD MMM AAAA): "; cin >> diaF >> mesF >> anoF;
+                    dtFim.setValor(stoi(diaF), mesF, stoi(anoF));
+
+                    cout << "Valor (00.00): "; cin >> valStr;
+                    // Conversão simples de string para double
+                    val.setValor(stod(valStr));
+
+                    novaReserva.setCodigo(cod);
+                    novaReserva.setChegada(dtIni);
+                    novaReserva.setPartida(dtFim);
+                    novaReserva.setValor(val);
+
+                    if(servicoReserva->criarReserva(novaReserva))
+                        cout << "Reserva criada com sucesso!\n";
+                    else
+                        cout << "Falha ao criar reserva (Conflito ou Erro).\n";
+
+                } catch (const exception& e) {
+                    cout << "Erro nos dados: " << e.what() << endl;
+                }
+                break;
+            }
+            case 2: {
+                // Listar
+                list<Reserva> lista = servicoReserva->listarReservas();
+                if(lista.empty()) cout << "Nenhuma reserva encontrada.\n";
+                for(const auto& r : lista) {
+                    cout << "Reserva: " << r.getCodigo().getValor()
+                         << " | Valor: " << r.getValor().getValor() << endl;
+                }
+                esperarEnter();
+                break;
+            }
+            case 3: {
+                // Pesquisar
+                string codStr;
+                cout << "Codigo da Reserva: "; cin >> codStr;
+                try {
+                    Codigo cod; cod.setValor(codStr);
+                    Reserva r = servicoReserva->lerReserva(cod);
+                    // Verifica se retornou algo válido (implementação do stub vai definir isso)
+                    if(r.getCodigo().getValor() == codStr)
+                        cout << "Encontrada! Chegada: " << r.getChegada().getDia() << "/" << r.getChegada().getMes() << endl;
+                    else
+                        cout << "Nao encontrada.\n";
+                } catch (...) { cout << "Erro de formato.\n"; }
+                esperarEnter();
+                break;
+            }
+            case 4: {
+                // Deletar
+                string codStr;
+                cout << "Codigo para deletar: "; cin >> codStr;
+                try {
+                    Codigo cod; cod.setValor(codStr);
+                    if(servicoReserva->deletarReserva(cod)) cout << "Reserva deletada.\n";
+                    else cout << "Reserva nao encontrada.\n";
+                } catch(...) { cout << "Erro.\n"; }
+                break;
+            }
+            case 5: break;
+        }
+    }
+}
+
+// --- STUBS DOS OUTROS SUB-MENUS (HOTEL, QUARTO, HOSPEDE) ---
+// Implementação simplificada para cumprir o contrato
+
+void CntrMAReserva::menuHoteis() {
+    cout << "\n[Funcionalidade de Hoteis acessada via Controlador de Reservas]\n";
+    cout << "1. Listar Hoteis\n2. Voltar\nSelecione: ";
+    int op; cin >> op;
+    if(op == 1) {
+        list<Hotel> hoteis = servicoReserva->listarHoteis();
+        if(hoteis.empty()) cout << "Nenhum hotel cadastrado.\n";
+        else cout << "Hoteis listados com sucesso.\n";
+    }
+}
+
+void CntrMAReserva::menuQuartos() {
+    cout << "\n[Funcionalidade de Quartos acessada via Controlador de Reservas]\n";
+    // Lógica similar usando servicoReserva->criarQuarto, etc.
+    esperarEnter();
+}
+
+void CntrMAReserva::menuHospedes() {
+    cout << "\n[Funcionalidade de Hospedes acessada via Controlador de Reservas]\n";
+    // Aqui usamos servicoPessoa pois hóspede é Pessoa
+    // Lógica similar usando servicoPessoa->criarHospede, etc.
+    esperarEnter();
+}
+
+// ====================================================================
+// 4. IMPLEMENTAÇÃO: CONTROLADORA DE INTEGRAÇÃO (MAI)
+// ====================================================================
+
+void CntrMAIntegracao::executar() {
+    while (true) {
+        // 1. Tenta autenticar
+        if (cntrAutenticacao->executar(emailUsuarioLogado)) {
+            autenticado = true;
+
+            // 2. Loop do Menu Principal (Pós-Login)
+            while (autenticado) {
+                cout << "\n=========================================\n";
+                cout << "        MENU PRINCIPAL (Logado)          \n";
+                cout << "=========================================\n";
+                cout << "1 - Meu Perfil (Dados Pessoais)\n";
+                cout << "2 - Gestao de Hotel e Reservas\n";
+                cout << "3 - Logout (Sair da conta)\n";
+                cout << "Selecione: ";
+
+                int opcao;
+                cin >> opcao;
+                if (cin.fail()) { cin.clear(); limparBuffer(); continue; }
+
+                switch (opcao) {
+                    case 1:
+                        if (cntrPessoal) cntrPessoal->executar(emailUsuarioLogado);
+                        else cout << "Erro: Modulo Pessoal nao inicializado.\n";
+                        break;
+                    case 2:
+                        if (cntrReserva) cntrReserva->executar(emailUsuarioLogado);
+                        else cout << "Erro: Modulo Reserva nao inicializado.\n";
+                        break;
+                    case 3:
+                        autenticado = false;
+                        cout << "Deslogando...\n";
+                        break;
+                    default:
+                        cout << "Opcao invalida.\n";
+                }
+            }
+        } else {
+            // Se autenticação falhar ou usuário pedir para sair no menu de login
+            cout << "Encerrando sistema. Ate logo!\n";
+            break;
+        }
+    }
 }
