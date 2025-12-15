@@ -1,0 +1,31 @@
+# Prerequisite
+*.d
+
+# Compilations and Binaries
+/build/
+/bin/
+/obj/
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# VS Code
+.vscode/
+
+# Code::Blocks (Legacy)
+*.layout
+*.depend
+*.cbp
+*.workspace
+
+# Operating System
+.DS_Store
+Thumbs.db
