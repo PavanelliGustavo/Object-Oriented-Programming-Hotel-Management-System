@@ -155,4 +155,4 @@ This decision preserves the original domain language of the stakeholders and req
 
 This project is **open-source** and available for **educational purposes**.
 
-Developed by **[Your Name]**
+Developed by **Gustavo Pavanelli** and **Maria Eduarda Vidal**
