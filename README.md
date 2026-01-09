@@ -61,21 +61,28 @@ Responsible for business logic, rules enforcement, and data persistence.
 The project follows a standard C++ directory layout:
 
 ```text
-HotelManagementSystem/
-├── include/        # Header files (.hpp) defining contracts and entities
-│   ├── domains.hpp
-│   ├── entities.hpp
-│   ├── interfaces.hpp
-│   └── ...
-├── src/            # Source files (.cpp) implementing the logic
-│   ├── presentation.cpp
-│   ├── services.cpp
-│   ├── domains.cpp
-│   ├── containers.cpp
-│   └── ...
-├── docs/           # Documentation and diagrams
-├── CMakeLists.txt  # Build configuration
-└── main.cpp        # Application entry point
+Hotel-Management-System/
+├── docs/html/               # Documentation and diagrams
+│
+├── include/                 # Header files (.hpp) defining contracts and abstractions
+│   ├── containers.hpp       # Data containers and repository-like structures
+│   ├── domains.hpp          # Domain rules, validations, and business logic definitions
+│   ├── entities.hpp         # Core domain entities (Hotel, Room, Reservation, etc.)
+│   ├── interfaces.hpp       # Interfaces and contracts between system layers
+│   ├── presentation.hpp     # Presentation layer definitions (CLI / UI interfaces)
+│   └── services.hpp         # Application services coordinating domain operations
+│
+├── src/                     # Source files (.cpp) implementing system logic
+│   ├── containers.cpp       # Implementations of data containers and repositories
+│   ├── domains.cpp          # Implementations of domain rules and business logic
+│   ├── presentation.cpp     # User interface and input/output handling
+│   └── services.cpp         # Implementations of application services
+│
+├── .gitignore               
+├── CMakeLists.txt           # CMake build configuration
+├── Doxyfile                 # Doxygen configuration file
+├── README.md                
+└── main.cpp                 # Application entry point
 ```
 
 ---
